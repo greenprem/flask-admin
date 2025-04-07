@@ -6,9 +6,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
 
 
-DeclarativeBase = declarative_base
 # Create base class for SQLAlchemy models
-class Base(DeclarativeBase):
+class Base(declarative_base):
     pass
 
 # Initialize SQLAlchemy
