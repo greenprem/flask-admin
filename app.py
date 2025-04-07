@@ -3,8 +3,10 @@ import importlib
 import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.ext.declarative import declarative_base
 
+
+DeclarativeBase = declarative_base
 # Create base class for SQLAlchemy models
 class Base(DeclarativeBase):
     pass
