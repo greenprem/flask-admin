@@ -1,0 +1,106 @@
+{% extends 'admin/model/list.html' %}
+
+{% block head_css %}
+  {{ super() }}
+  <style>
+    .search-form {
+      margin-bottom: 20px;
+    }
+    .actions-column {
+      width: 150px;
+      text-align: center;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+  </style>
+{% endblock %}
+
+{% block list_header %}
+<div class="row mb-4">
+  <div class="col-md-6">
+    <h3>
+      <i class="fas fa-table me-2"></i>{{ admin_view.name }} List
+    </h3>
+  </div>
+  <div class="col-md-6 text-end">
+    {% if admin_view.can_create %}
+      <a href="{{ get_url('.create_view', url=return_url) }}" class="btn btn-success">
+        <i class="fas fa-plus me-1"></i>Create New
+      </a>
+    {% endif %}
+    {% if admin_view.can_export %}
+      <a href="{{ get_url('.export', export_type='csv', url=return_url) }}" class="btn btn-secondary">
+        <i class="fas fa-download me-1"></i>Export CSV
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card shadow mb-4">
+  <div class="card-header">
+    <div class="row">
+      <div class="col">
+        <form class="search-form" method="GET" action="{{ get_url('.index_view') }}">
+          <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search..." 
+                  value="{{ request.args.get('search', '') }}">
+            <button class="btn btn-primary" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+            {% if request.args.get('search') %}
+              <a href="{{ get_url('.index_view') }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+              </a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-container">
+      {% if count %}
+        {{ super() }}
+      {% else %}
+        <div class="alert alert-info mb-0">
+          <i class="fas fa-info-circle me-2"></i>No records found.
+          {% if admin_view.can_create %}
+            <a href="{{ get_url('.create_view', url=return_url) }}" class="alert-link">
+              Create a new record
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  {% if count %}
+    <div class="card-footer">
+      <div class="row">
+        <div class="col-auto">
+          <span class="text-muted">Showing {{ page_num * page_size + 1 }} to {{ page_num * page_size + count }} of {{ total_count }} entries</span>
+        </div>
+        <div class="col text-end">
+          {{ lib.pager(page, num_pages, generator) }}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    $(document).ready(function() {
+      // Initialize DataTable on our list view
+      $('.model-list').DataTable({
+        paging: false,
+        searching: false,
+        responsive: true,
+        info: false,
+        ordering: true
+      });
+    });
+  </script>
+{% endblock %}

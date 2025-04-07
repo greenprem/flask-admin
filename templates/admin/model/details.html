@@ -1,0 +1,49 @@
+{% extends 'admin/model/details.html' %}
+
+{% block body %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="card shadow">
+      <div class="card-header">
+        <h3 class="card-title mb-0">
+          <i class="fas fa-info-circle me-2"></i>{{ admin_view.name }} Details
+        </h3>
+      </div>
+      <div class="card-body">
+        <table class="table table-hover table-striped table-borderless">
+          <tbody>
+            {% for c, name in details_columns %}
+              <tr>
+                <th class="col-md-3">{{ name }}</th>
+                <td>
+                  {{ get_value(model, c) }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer">
+        {% if admin_view.can_edit %}
+          <a href="{{ get_url('.edit_view', id=get_pk_value(model), url=return_url) }}" class="btn btn-primary">
+            <i class="fas fa-edit me-1"></i>Edit
+          </a>
+        {% endif %}
+        {% if admin_view.can_delete %}
+          <form class="d-inline" method="POST" action="{{ get_url('.delete_view') }}">
+            <input type="hidden" name="id" value="{{ get_pk_value(model) }}" />
+            <input type="hidden" name="url" value="{{ return_url }}" />
+            <button onclick="return confirm('Are you sure you want to delete this record?');" 
+                    class="btn btn-danger">
+              <i class="fas fa-trash me-1"></i>Delete
+            </button>
+          </form>
+        {% endif %}
+        <a href="{{ return_url }}" class="btn btn-secondary">
+          <i class="fas fa-arrow-left me-1"></i>Back to List
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}{{ admin_view.admin.name }} - Dashboard{% endblock %}
+
+{% block header %}Dashboard{% endblock %}
+
+{% block body %}
+<div class="row">
+  <div class="col-md-12 mb-4">
+    <div class="card shadow">
+      <div class="card-body">
+        <h3 class="card-title">Welcome to your Dynamic Admin Panel</h3>
+        <p class="card-text">
+          This admin panel automatically discovers your SQLAlchemy models and provides a beautiful interface for managing your data.
+        </p>
+        <p>
+          To get started, use the navigation menu to access your database models. You can:
+        </p>
+        <ul>
+          <li>View and search existing records</li>
+          <li>Create new entries</li>
+          <li>Edit or update data</li>
+          <li>Delete records (with confirmation)</li>
+          <li>Filter and sort data</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-12">
+    <div class="row">
+      {% for item in admin_view.admin.menu() %}
+        {% if not item.is_category() %}
+          <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card h-100 shadow">
+              <div class="card-body">
+                <h5 class="card-title">
+                  {% if item.class_name %}<i class="{{ item.class_name }} me-2"></i>{% endif %}
+                  {{ item.name }}
+                </h5>
+                <p class="card-text text-muted">Manage {{ item.name }} data</p>
+              </div>
+              <div class="card-footer bg-transparent border-top-0">
+                <a href="{{ item.get_url() }}" class="btn btn-primary">View {{ item.name }}</a>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          {% for child in item.get_children() %}
+            <div class="col-md-4 col-sm-6 mb-4">
+              <div class="card h-100 shadow">
+                <div class="card-body">
+                  <h5 class="card-title">
+                    {% if child.class_name %}<i class="{{ child.class_name }} me-2"></i>{% endif %}
+                    {{ child.name }}
+                  </h5>
+                  <p class="card-text text-muted">{{ item.name }} - {{ child.name }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0">
+                  <a href="{{ child.get_url() }}" class="btn btn-primary">View {{ child.name }}</a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
