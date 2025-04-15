@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <title>Starlette Admin Demo</title>
+    <link rel="stylesheet" href="{{ url_for('admin-sqla:statics', path='css/tabler.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('admin-sqla:statics', path='css/fontawesome.min.css') }}">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+      :root {
+      	--tblr-font-sans-serif: Inter,-apple-system,BlinkMacSystemFont,San Francisco,Segoe UI,Roboto,Helvetica Neue,sans-serif !important;
+      }
+
+    </style>
+    {% if config.gtag %}
+    <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id={{config.gtag}}"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "{{config.gtag}}");
+
+    </script>
+    {% endif %}
+</head>
+<body>
+
+<div class="page">
+    <div class="page-body">
+        <div class="container-xl">
+            <h1>GRAI Admin Panel</h1>
+            <p class="text-muted">
+                
+            </p>
+            <div class="row row-cards" data-masonry='{"percentPosition": true }'>
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title">CRUD Operation   </h3>
+                            <p>
+                                <strong>Username:</strong> admin or demo
+                            </p>
+                            <p>
+                                <strong>Passowrd:</strong> password
+                            </p>
+                            <p>
+                                <strong>Note:</strong>
+                            <ul>
+                                <li>
+                                    Accessible
+                                </li>
+                               
+                            </ul>
+                            </p>
+                        </div>
+                        <!-- Card footer -->
+                        <div class="card-footer">
+                            <a href="/admin/sqla" class="btn btn-primary">Browse admin</a>
+                        </div>
+                    </div>
+                </div>
+                
+                   
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{{ url_for('statics', path='js/vendor/masonry.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('admin-sqla:statics', path='js/vendor/jquery.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('admin-sqla:statics', path='js/vendor/tabler.min.js') }}"></script>
+</body>
+</html>
