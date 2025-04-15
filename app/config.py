@@ -1,11 +1,13 @@
 from typing import Optional
 
 from pydantic import BaseSettings
-from decouple import RepositoryEnv
+from dotenv import load_dotenv
+import os
 
-config = RepositoryEnv('.env')
+load_dotenv('.env')
 
-DATABASE_URL = config['DATABASE_URL']
+DATABASE_URL = os.getenv('DATABASE_URL')
+
 
 
 class Config(BaseSettings):
