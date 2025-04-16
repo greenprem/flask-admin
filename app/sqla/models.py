@@ -33,7 +33,7 @@ class CycleInfo(Base):
     date = Column(BigInteger, nullable=False)
     startDate = Column(BigInteger, nullable=False)
     date_date = Column(Date, nullable=False)
-    startDate_date = Column(Date, nullable=False)
+    startdate_date = Column(Date, nullable=False)
     observationPending = Column(Boolean, default=False)
     comparedTo = Column(String(50), nullable=True)
     reportwriting = Column(Boolean, default=False)
