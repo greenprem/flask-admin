@@ -39,8 +39,8 @@ admin = Admin(
     base_url="/admin/sqla",
     route_name="admin-sqla",
     templates_dir="templates/admin/sqla",
-    logo_url="https://www.grai.life/grai_logo.png",
-    login_logo_url="https://www.grai.life/grai_logo.png",
+    logo_url="https://i.postimg.cc/NfxBz5Km/image-removebg-preview-5.png",
+    login_logo_url="https://i.postimg.cc/NfxBz5Km/image-removebg-preview-5.png",
     index_view=None,  # Removed HomeView
     auth_provider=MyAuthProvider(login_path="/sign-in", logout_path="/sign-out"),
     middlewares=[Middleware(SessionMiddleware, secret_key=config.secret)],
