@@ -16,3 +16,4 @@ docker-compose.yml
 __pycache__/
 .pytest_cache/
 upload/
+.env
