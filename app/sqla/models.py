@@ -15,13 +15,13 @@ class Client(Base):
     site_name = Column(PostgresJSON, nullable=False)  # Store list of site names as JSON
     greenhouse_name = Column(PostgresJSON, nullable=False)  # Store list of greenhouse names as JSON
 
-
+'''
 class SymptomThreshold(Base):
     __tablename__ = 'symptom_threshold'
     id = Column(Integer, primary_key=True)
     disease = Column(String(10), nullable=False)
     val = Column(Integer, nullable=False)
-
+'''
 
 class CycleInfo(Base):
     __tablename__ = 'cycle-info'
@@ -63,7 +63,7 @@ class EnvData(Base):
     time = Column(Time, nullable=False)
     json_data = Column(MutableDict.as_mutable(PostgresJSON), nullable=False)
 
-
+'''
 class Feedback(Base):
     __tablename__ = 'feedback'
 
@@ -77,6 +77,7 @@ class Feedback(Base):
     fileName = Column(String(255))
     video_status = Column(String(255), default='Pending')
     video_url = Column(String(255), nullable=True)
+    '''
 
 
 class SensorRange(Base):
@@ -185,7 +186,7 @@ class GridAnalysis(Base):
     selected_cycle = Column(String(255))
     json_data = Column(PostgresJSON, nullable=False)
 
-
+'''
 class FeedBackGridImages(Base):
     __tablename__ = 'feedback_grid_images'
     id = Column(Integer, primary_key=True)
@@ -195,8 +196,9 @@ class FeedBackGridImages(Base):
     selected_cycle = Column(String(255))
     selected_grid = Column(String(255))
     json_data = Column(PostgresJSON, nullable=False)
+    '''
 
-
+'''
 class Weeks(Base):
     __tablename__ = 'weeks'
     id = Column(Integer, primary_key=True)
@@ -221,3 +223,4 @@ class Weeks(Base):
             "start_cycle": self.start_cycle,
             "end_cycle": self.end_cycle,
         }
+    '''
