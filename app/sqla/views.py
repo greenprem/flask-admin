@@ -1,8 +1,6 @@
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette_admin.exceptions import FormValidationError
 from starlette_admin import RowActionsDisplayType
-from starlette_admin.widgets import JSONEditorWidget
-
 from starlette.requests import Request
 from typing import Any, Dict
 
@@ -23,23 +21,8 @@ class ClientView(ModelView):
     sortable_fields = ["id", "client_name"]
 
     # Make fields read-only in edit form
-    exclude_fields_from_edit = ["client_name", "username", "password"]
+    exclude_fields_from_edit = ["client_name", "username", "password", "site_name", "greenhouse_name"]
 
-    # Modify the form view
-    def form(self):
-        form = super().form()
-
-        # Check if the object already exists (i.e., in edit mode)
-        if self.object:
-            # Set greenhouse_name as read-only except for adding new entries
-            existing_values = self.object.greenhouse_name or []
-            form["greenhouse_name"].widget = JSONEditorWidget(
-                value=existing_values,
-                read_only=True,
-                addable=True  # Allow adding new objects, but not modifying existing ones
-            )
-
-        return form
 # class SymptomThresholdView(ModelView):
 #     page_size = 10
 #     fields = ["id", "disease", "val"]
