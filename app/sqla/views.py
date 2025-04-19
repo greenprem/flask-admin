@@ -7,64 +7,22 @@ from typing import Any, Dict
 from app.sqla.models import Client, SymptomThreshold, CycleInfo, Greenhouse, EnvData, Feedback, SensorRange, DiseaseData, BucketValues, PlantWeek, Observation, Grid, GridAnalysis, FeedBackGridImages, Weeks
 
 
+
 class ClientView(ModelView):
     page_size = 10
-    page_size_options = [10, 25, 50, -1]
 
+    # Fields to show in the table view
     fields = [
-        "id",
-        "client_name",
-        "username",
-        "password",  # You might want to hide this or mask it
-        "site_name",
-        "greenhouse_name",
+        "id", "client_name", "username", "site_name", "greenhouse_name"
     ]
 
-    searchable_fields = [
-        Client.client_name,
-        Client.username,
-    ]
+    # Fields to search and sort by
+    searchable_fields = ["client_name", "username"]
+    sortable_fields = ["id", "client_name"]
 
-    sortable_fields = [
-        Client.id,
-        Client.client_name,
-        Client.username,
-    ]
-
-    row_actions_display_type = RowActionsDisplayType.DROPDOWN
-
-    # Optional: Exclude password field from views
-    exclude_fields_from_list = ["password"]
-    exclude_fields_from_detail = ["password"]
-    exclude_fields_from_edit = ["password"]
-    exclude_fields_from_create = []
-
-    async def validate(self, request: Request, data: Dict[str, Any]) -> None:
-        errors: Dict[str, str] = {}
-
-        if not data.get("client_name"):
-            errors["client_name"] = "Client name is required"
-        if not data.get("username"):
-            errors["username"] = "Username is required"
-        if not data.get("password"):
-            errors["password"] = "Password is required"
-        if not data.get("site_name"):
-            errors["site_name"] = "At least one site name is required"
-        if not data.get("greenhouse_name"):
-            errors["greenhouse_name"] = "At least one greenhouse name is required"
-
-        if errors:
-            raise FormValidationError(errors)
-
-        return await super().validate(request, data)
-
-    def can_delete(self, request: Request) -> bool:
-        # You can change this depending on access level
-        return True
-
-    def can_edit(self, request: Request) -> bool:
-        return True
-
+    # Make fields read-only in edit form
+    exclude_fields_from_edit = ["client_name", "username", "password"]
+    
 class SymptomThresholdView(ModelView):
     page_size = 10
     fields = ["id", "disease", "val"]
