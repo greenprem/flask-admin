@@ -57,7 +57,7 @@ class EnvData(Base):
     id = Column(Integer, primary_key=True)
     client_name = Column(String(50), nullable=False)
     site = Column(String(50), nullable=False)
-    greenhouse_id = Column(Integer, ForeignKey('greenhouse.id'), nullable=False)
+    greenhouse_id = Column(String(50), nullable=False)
     item_id = Column(Integer, nullable=False)
     date = Column(Date, nullable=False)
     time = Column(Time, nullable=False)
