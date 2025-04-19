@@ -29,15 +29,14 @@ class ClientView(ModelView):
 #     searchable_fields = [SymptomThreshold.disease]
 #     sortable_fields = [SymptomThreshold.id, SymptomThreshold.disease]
 
-# class CycleInfoView(ModelView):
-#     page_size = 10
-#     fields = [
-#         "id", "client_name", "site", "greenhouse", "name",
-#         "date", "startDate", "observationPending",
-#         "comparedTo", "reportwriting"
-#     ]
-#     searchable_fields = [CycleInfo.client_name, CycleInfo.name]
-#     sortable_fields = [CycleInfo.id, CycleInfo.date, CycleInfo.startDate]
+class CycleInfoView(ModelView):
+    page_size = 10
+    fields = [
+        "id", "client_name", "site", "greenhouse", "name",
+        "date", "startDate", "observationPending",
+        "comparedTo", "reportwriting"
+    ]
+    exclude_fields_from_edit = ["client_name", "site", "greenhouse"]
 
 
 
