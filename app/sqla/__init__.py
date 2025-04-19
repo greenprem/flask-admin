@@ -17,7 +17,7 @@ from app.config import config
 from app.sqla.auth import MyAuthProvider
 from app.sqla.models import Client, CycleInfo, EnvData, SensorRange, DiseaseData, BucketValues, PlantWeek, Observation, Grid, GridAnalysis
 #from app.sqla.views import ClientView, SymptomThresholdView, CycleInfoView, EnvDataView, FeedbackView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, FeedBackGridImagesView, WeeksView
-
+from app.sqla.views import ClientView
 __all__ = ["engine", "admin"]
 
 # Save avatar to local Storage
@@ -46,7 +46,7 @@ admin = Admin(
 )
 
 # Register only Client view
-admin.add_view(ModelView(Client, icon="fa fa-id-badge", label="Clients"))
+admin.add_view(ClientView(Client, icon="fa fa-id-badge", label="Clients"))
 #admin.add_view(ModelView(SymptomThreshold, icon="fa fa-id-badge", label="Symptom Threshold"))
 admin.add_view(ModelView(CycleInfo, icon="fa fa-id-badge", label="Cycle Info"))
 admin.add_view(ModelView(EnvData, icon="fa fa-id-badge", label="Env Data"))
