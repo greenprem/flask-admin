@@ -13,7 +13,7 @@ class ClientView(ModelView):
 
     # Fields to show in the table view
     fields = [
-        "id", "client_name", "username", "site_name", "greenhouse_name"
+        "id", "client_name", "username", "password", "site_name", "greenhouse_name"
     ]
 
     # Fields to search and sort by
