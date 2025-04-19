@@ -33,7 +33,7 @@ class CycleInfoView(ModelView):
     page_size = 10
     fields = [
         "id", "client_name", "site", "greenhouse", "name",
-        "date", "startDate", "observationPending",
+        "date_date", "startdate_date", "observationPending",
         "comparedTo", "reportwriting"
     ]
     exclude_fields_from_edit = ["client_name", "site", "greenhouse"]
