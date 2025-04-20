@@ -3,6 +3,9 @@ from starlette_admin.exceptions import FormValidationError
 from starlette_admin import RowActionsDisplayType
 from starlette.requests import Request
 from typing import Any, Dict
+from starlette.responses import JSONResponse, RedirectResponse
+from sqlalchemy import func, select
+from starlette_admin import action
 
 # from app.sqla.models import Client, SymptomThreshold, CycleInfo, Greenhouse, EnvData, Feedback, SensorRange, DiseaseData, BucketValues, PlantWeek, Observation, Grid, GridAnalysis, FeedBackGridImages, Weeks
 
@@ -94,7 +97,143 @@ class ObservationView(ModelView):
         "copy", "env_data", "grid_data", "plant_data"
     ]
     exclude_fields_from_edit = ["client_name", "site", "greenhouse", "cycle_name"]
+    
+    @action(
+        name="highest_copy",
+        label="Find Highest Copy Value",
+        confirmation="Find the highest copy value for the selected filters?",
+        form=True
+    )
+    async def highest_copy_action(self, request):
+        """Find the highest copy value based on selected filters"""
+        # Get form data
+        form_data = await request.form()
+        client_name = form_data.get("client_name", "")
+        site = form_data.get("site", "")
+        greenhouse = form_data.get("greenhouse", "")
+        cycle_name = form_data.get("cycle_name", "")
 
+        # Construct base query
+        query = select(func.max(self.model.copy)).select_from(self.model)
+        
+        # Apply filters if provided
+        filters_applied = False
+        if client_name:
+            query = query.filter(self.model.client_name == client_name)
+            filters_applied = True
+        if site:
+            query = query.filter(self.model.site == site)
+            filters_applied = True
+        if greenhouse:
+            query = query.filter(self.model.greenhouse == greenhouse)
+            filters_applied = True
+        if cycle_name:
+            query = query.filter(self.model.cycle_name == cycle_name)
+            filters_applied = True
+            
+        # Execute query
+        async with self.context.get_session() as session:
+            result = await session.execute(query)
+            highest_copy = result.scalar()
+        
+        # Prepare message
+        if filters_applied:
+            filter_description = []
+            if client_name:
+                filter_description.append(f"Client: {client_name}")
+            if site:
+                filter_description.append(f"Site: {site}")
+            if greenhouse:
+                filter_description.append(f"Greenhouse: {greenhouse}")
+            if cycle_name:
+                filter_description.append(f"Cycle: {cycle_name}")
+            
+            filter_text = ", ".join(filter_description)
+            message = f"Highest copy value for {filter_text}: {highest_copy}"
+        else:
+            message = f"Highest copy value overall: {highest_copy}"
+        
+        # Add message to flash and redirect back
+        self.context.flash(message, "success")
+        return RedirectResponse(
+            request.url_for(self.context.route_name, path=self.identity), status_code=302
+        )
+    
+    # Define form fields for the action
+    def get_actions(self):
+        actions = super().get_actions()
+        for action in actions:
+            if action.name == "highest_copy":
+                # Define form fields for this action
+                action.form_fields = [
+                    {
+                        "name": "client_name",
+                        "label": "Client Name",
+                        "type": "select",
+                        "options": [("", "-- Select Client --")],  # Will be populated dynamically
+                        "required": False
+                    },
+                    {
+                        "name": "site",
+                        "label": "Site",
+                        "type": "select",
+                        "options": [("", "-- Select Site --")],  # Will be populated dynamically
+                        "required": False
+                    },
+                    {
+                        "name": "greenhouse",
+                        "label": "Greenhouse",
+                        "type": "select",
+                        "options": [("", "-- Select Greenhouse --")],  # Will be populated dynamically
+                        "required": False
+                    },
+                    {
+                        "name": "cycle_name",
+                        "label": "Cycle Name",
+                        "type": "select",
+                        "options": [("", "-- Select Cycle --")],  # Will be populated dynamically
+                        "required": False
+                    }
+                ]
+        return actions
+    
+    async def render_action_form(self, request, action_name):
+        """Override to populate select options dynamically"""
+        if action_name == "highest_copy":
+            form = await super().render_action_form(request, action_name)
+            
+            # Populate options for selects
+            async with self.context.get_session() as session:
+                # Get client options
+                result = await session.execute(select(self.model.client_name).distinct().order_by(self.model.client_name))
+                client_options = [("", "-- Select Client --")] + [(c, c) for c in result.scalars().all() if c]
+                
+                # Get site options
+                result = await session.execute(select(self.model.site).distinct().order_by(self.model.site))
+                site_options = [("", "-- Select Site --")] + [(s, s) for s in result.scalars().all() if s]
+                
+                # Get greenhouse options
+                result = await session.execute(select(self.model.greenhouse).distinct().order_by(self.model.greenhouse))
+                greenhouse_options = [("", "-- Select Greenhouse --")] + [(g, g) for g in result.scalars().all() if g]
+                
+                # Get cycle options
+                result = await session.execute(select(self.model.cycle_name).distinct().order_by(self.model.cycle_name))
+                cycle_options = [("", "-- Select Cycle --")] + [(c, c) for c in result.scalars().all() if c]
+            
+            # Update options in form fields
+            for field in form["fields"]:
+                if field["name"] == "client_name":
+                    field["options"] = client_options
+                elif field["name"] == "site":
+                    field["options"] = site_options
+                elif field["name"] == "greenhouse":
+                    field["options"] = greenhouse_options
+                elif field["name"] == "cycle_name":
+                    field["options"] = cycle_options
+            
+            return form
+        return await super().render_action_form(request, action_name)
+    
 class GridView(ModelView):
     page_size = 10
     fields = [
