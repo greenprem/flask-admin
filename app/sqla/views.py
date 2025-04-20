@@ -100,7 +100,6 @@ class ObservationView(ModelView):
     
     @action(
         name="highest_copy",
-        label="Find Highest Copy Value",
         confirmation="Find the highest copy value for the selected filters?",
         form=True
     )
