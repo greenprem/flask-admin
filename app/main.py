@@ -275,7 +275,7 @@ app = Starlette(
     ]
 )
 
-app.add_middleware(SessionMiddleware, secret_key="super-secret-key")
+#app.add_middleware(SessionMiddleware, secret_key="super-secret-key")
 
 
 admin_sqla.mount_to(app)
