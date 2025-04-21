@@ -7,6 +7,7 @@ from starlette.responses import JSONResponse
 from sqlalchemy import select, func
 from app.db import SessionLocal
 from app.sqla.models import Observation
+from app.sqla.models1 import Observation as Observation1
 from app.config import config
 from app.sqla import admin as admin_sqla
 import json
@@ -32,8 +33,8 @@ def get_max_copy(request: Request):
     if not all([client_name, site, greenhouse, cycle_name]):
         return JSONResponse({"error": "Missing required parameters"}, status_code=400)
 
-    # Create a session object using the SessionLocal sessionmaker
-    session = SessionLocal()  # This is where you instantiate the session
+    # Create a session instance from the sessionmaker
+    session = SessionLocal()  # This creates a session instance
 
     try:
         stmt = (
@@ -45,13 +46,17 @@ def get_max_copy(request: Request):
                 Observation.cycle_name == cycle_name,
             )
         )
-        result = session.execute(stmt)  # Now, you can use 'session.execute'
+        result = session.execute(stmt)  # Now using the session instance
         max_copy = result.scalar()  # Extract the scalar value from the result
 
-    finally:
-        session.close()  # Close the session after use
+        return JSONResponse({"max_copy": max_copy or 0})
 
-    return JSONResponse({"max_copy": max_copy or 0})
+    except Exception as e:
+        # Log the exception if needed
+        return JSONResponse({"error": str(e)}, status_code=500)
+    
+    finally:
+        session.close()  # Properly close the session instance
 
 
 app = Starlette(
@@ -59,7 +64,7 @@ app = Starlette(
         Route("/", homepage),
         Route("/panel", panel),
         Mount("/statics", app=StaticFiles(directory="statics"), name="statics"),
-        Route("/get-max-copy", get_max_copy, methods=["POST"]),
+        Route("/get-max-copy", get_max_copy, methods=["GET"]),
     ]
 )
 
