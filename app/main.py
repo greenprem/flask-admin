@@ -22,11 +22,137 @@ from starlette.responses import HTMLResponse, RedirectResponse, PlainTextRespons
 async def login_page(request):
     return HTMLResponse("""
         <html>
+                        <head><style>
+        html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f7f7f7;
+    font-family: 'Roboto Slab', sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+#flash-messages-container {
+    position: fixed;
+    width: 100%;
+    top: 80px; /* Below the navbar */
+    left: 0;
+    z-index: 1100; /* Higher than navbar for visibility */
+    display: flex;
+    justify-content: center; /* Center the messages horizontally */
+    padding: 10px 0; /* Spacing above and below the messages */
+}
+
+#flash-messages {
+    width: 90%;
+    max-width: 600px; /* Adjust width of flash message container */
+}
+
+.alert {
+    margin-bottom: 20px;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    padding: 15px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+form {
+    width: 90%;
+    max-width: 320px;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+h2 {
+    color: #4CAF50;
+    font-size: 25px; 
+    margin-bottom: 20px; 
+}
+
+label {
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.navbar {
+    width: 100%;
+    height: 80px; 
+    padding: 0;
+    margin: 0; 
+    box-sizing: border-box; 
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; 
+    position: fixed;
+    top: 0; 
+    left: 0; 
+    z-index: 1000; 
+    background-color: #001529; 
+    border: none;
+}
+
+.text-container {
+    color: white;
+    margin: 2%;
+    font-size: 20px;
+}
+
+
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px; /* Adjusted to match button and link heights */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: 'Roboto Slab', sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+input[type="submit"] {
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #4CAF50; /* Aligned with button styles for consistency */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Roboto Slab', sans-serif;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 500;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+input[type="submit"]:hover {
+    background-color: #45a049; /* Darker shade for hover effect */
+}
+    </style></head>
         <body>
             <form action="/login" method="post">
-                Username: <input type="text" name="username"><br>
-                Password: <input type="password" name="password"><br>
-                <button type="submit">Login</button>
+                        <h2>Admin Login</h2>
+                <label for="username">Username</label> <input type="text" name="username"><br>
+                <label for="password">Password</label> <input type="password" name="password"><br>
+                <input type="submit" value="Login">
             </form>
         </body>
         </html>
