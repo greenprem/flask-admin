@@ -12,12 +12,45 @@ from app.sqla.models import Client
 from app.config import config
 from app.sqla import admin as admin_sqla
 import json
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.responses import HTMLResponse, RedirectResponse, PlainTextResponse
 
 
-def homepage(request):
+
+
+# Login page
+async def login_page(request):
+    return HTMLResponse("""
+        <html>
+        <body>
+            <form action="/login" method="post">
+                Username: <input type="text" name="username"><br>
+                Password: <input type="password" name="password"><br>
+                <button type="submit">Login</button>
+            </form>
+        </body>
+        </html>
+    """)
+
+# Login handler
+async def login_handler(request):
+    form = await request.form()
+    username = form.get("username")
+    password = form.get("password")
+
+    if username == "admin" and password == "123456":
+        request.session["user"] = "admin"
+        return RedirectResponse("/", status_code=302)
+    return PlainTextResponse("Invalid credentials", status_code=401)
+
+# Protected homepage
+async def homepage(request):
+    if request.session.get("user") != "admin":
+        return RedirectResponse("/login", status_code=302)
     return Jinja2Templates("templates").TemplateResponse(
         "index.html", {"request": request, "config": config}
     )
+
 
 def panel(request):
     return Jinja2Templates("templates").TemplateResponse(
@@ -103,6 +136,8 @@ async def update_greenhouses(request: Request):
 app = Starlette(
     routes=[
         Route("/", homepage),
+        Route("/login", login_page, methods=["GET"]),
+        Route("/login", login_handler, methods=["POST"]),
         Route("/panel", panel),
         Route("/greenhouse-panel", greenhouse_panel),
         Mount("/statics", app=StaticFiles(directory="statics"), name="statics"),
@@ -113,5 +148,8 @@ app = Starlette(
 
     ]
 )
+
+app.add_middleware(SessionMiddleware, secret_key="super-secret-key")
+
 
 admin_sqla.mount_to(app)
