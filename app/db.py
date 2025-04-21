@@ -7,8 +7,4 @@ from app.sqla.models import Base  # Assuming you have a Base model
 engine = create_engine(config.sqla_engine, echo=True)
 
 # Create a sessionmaker bound to the synchronous engine
-SessionLocal = sessionmaker(
-    bind=engine,
-    class_=sessionmaker,
-    expire_on_commit=False,
-)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
