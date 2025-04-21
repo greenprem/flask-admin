@@ -7,6 +7,7 @@ from starlette.responses import JSONResponse
 from sqlalchemy import select, func
 from app.db import SessionLocal
 from app.sqla.models import Observation
+from app.sqla.models import Client
 #from app.sqla.models1 import Observation as Observation1
 from app.config import config
 from app.sqla import admin as admin_sqla
