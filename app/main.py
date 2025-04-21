@@ -22,18 +22,17 @@ def panel(request):
         "panel.html", {"request": request, "config": config}
     )
 
-def get_max_copy(request: Request):
-    # Use request.body() for synchronous JSON parsing
-    body = request.body()
-    print(body)
-    data = json.loads(body)
+def get_max_copy(request: Request):  # No longer async
+    # Extract parameters from the GET request
+    client_name = request.query_params.get("client_name")
+    site = request.query_params.get("site")
+    greenhouse = request.query_params.get("greenhouse")
+    cycle_name = request.query_params.get("cycle_name")
 
-    client_name = data.get("client_name")
-    site = data.get("site")
-    greenhouse = data.get("greenhouse")
-    cycle_name = data.get("cycle_name")
+    if not all([client_name, site, greenhouse, cycle_name]):
+        return JSONResponse({"error": "Missing required parameters"}, status_code=400)
 
-    # Synchronous database session handling
+    # Use synchronous session here since it's a GET request (non-async)
     with SessionLocal() as session:
         stmt = (
             select(func.max(Observation.copy))

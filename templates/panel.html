@@ -22,14 +22,11 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const formData = new FormData(form);
-            const payload = Object.fromEntries(formData.entries());
+            const params = new URLSearchParams(formData.entries());
 
-            const response = await fetch('/get-max-copy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
+            // Make GET request with query parameters
+            const response = await fetch(`/get-max-copy?${params.toString()}`, {
+                method: 'GET',
             });
 
             const data = await response.json();
