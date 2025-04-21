@@ -31,17 +31,18 @@ async def get_max_copy(request: Request):
     greenhouse = data.get("greenhouse")
     cycle_name = data.get("cycle_name")
 
-    async with SessionLocal() as session:
-        query = (
-            select(func.max(Observation.copy))
-            .where(
-                Observation.client_name == client_name,
-                Observation.site == site,
-                Observation.greenhouse == greenhouse,
-                Observation.cycle_name == cycle_name,
-            )
+    stmt = (
+        select(func.max(Observation.copy))
+        .where(
+            Observation.client_name == client_name,
+            Observation.site == site,
+            Observation.greenhouse == greenhouse,
+            Observation.cycle_name == cycle_name,
         )
-        result = await session.execute(query)
+    )
+
+    async with engine.connect() as conn:
+        result = await conn.execute(stmt)
         max_copy = result.scalar()
 
     return JSONResponse({"max_copy": max_copy or 0})
