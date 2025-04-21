@@ -40,7 +40,7 @@
             const clients = await res.json();
             clients.forEach(client => {
                 const option = document.createElement('option');
-                option.value = client.client_name;
+                option.value = client;
                 option.textContent = client.client_name;
                 clientSelect.appendChild(option);
             });
