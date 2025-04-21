@@ -25,6 +25,7 @@ def panel(request):
 def get_max_copy(request: Request):
     # Use request.body() for synchronous JSON parsing
     body = request.body()
+    print(body)
     data = json.loads(body)
 
     client_name = data.get("client_name")
