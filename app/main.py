@@ -22,7 +22,7 @@ def panel(request):
         "panel.html", {"request": request, "config": config}
     )
 
-def get_max_copy(request: Request):  # No longer async
+def get_max_copy(request: Request):
     # Extract parameters from the GET request
     client_name = request.query_params.get("client_name")
     site = request.query_params.get("site")
@@ -32,8 +32,9 @@ def get_max_copy(request: Request):  # No longer async
     if not all([client_name, site, greenhouse, cycle_name]):
         return JSONResponse({"error": "Missing required parameters"}, status_code=400)
 
-    # Use synchronous session here since it's a GET request (non-async)
-    with SessionLocal() as session:
+    # Manually create the session (no 'with' statement here)
+    session = SessionLocal()
+    try:
         stmt = (
             select(func.max(Observation.copy))
             .where(
@@ -46,7 +47,11 @@ def get_max_copy(request: Request):  # No longer async
         result = session.execute(stmt)
         max_copy = result.scalar()
 
+    finally:
+        session.close()  # Ensure the session is closed after usage
+
     return JSONResponse({"max_copy": max_copy or 0})
+
 
 app = Starlette(
     routes=[
