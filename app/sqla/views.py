@@ -102,8 +102,8 @@ class ObservationView(ModelView):
         name="highest_copy",
         text="Find Highest Copy Value",
         confirmation="Find the highest copy value for the selected filters?",
-        form=True,
-        global_action=True
+        form=True
+        
     )
     async def highest_copy_action(self, request):
         """Find the highest copy value based on selected filters"""
