@@ -58,46 +58,58 @@
         });
 
         function renderFields() {
-            greenhouseFields.innerHTML = '';
-            for (const key in greenhouseData) {
-                const input = document.createElement('input');
-                input.name = key;
-                input.value = greenhouseData[key];
-                input.placeholder = key;
-                greenhouseFields.appendChild(document.createTextNode(`${key}: `));
-                greenhouseFields.appendChild(input);
-                greenhouseFields.appendChild(document.createElement('br'));
-            }
-        }
+    greenhouseFields.innerHTML = '';
 
-        function addNewGreenhouse() {
-            const key = document.getElementById('newKey').value;
-            const value = document.getElementById('newValue').value;
-            if (key && value) {
-                greenhouseData[key] = value;
-                renderFields();
-                document.getElementById('newKey').value = '';
-                document.getElementById('newValue').value = '';
-            }
-        }
+    const data = greenhouseData[0]; // access the object inside the array
 
-        greenhouseForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(greenhouseForm);
-            const updatedData = {};
-            for (const [key, value] of formData.entries()) {
-                updatedData[key] = value;
-            }
+    for (const key in data) {
+        const input = document.createElement('input');
+        input.name = key;
+        input.value = data[key];
+        input.placeholder = key;
+        greenhouseFields.appendChild(document.createTextNode(`${key}: `));
+        greenhouseFields.appendChild(input);
+        greenhouseFields.appendChild(document.createElement('br'));
+    }
+}
 
-            const res = await fetch('/update-greenhouses', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ client_name: currentClient, greenhouses: updatedData })
-            });
 
-            const result = await res.json();
-            alert(result.message);
-        });
+function addNewGreenhouse() {
+    const key = document.getElementById('newKey').value;
+    const value = document.getElementById('newValue').value;
+
+    if (key && value) {
+        greenhouseData[0][key] = value; // update the object inside the array
+        renderFields();
+        document.getElementById('newKey').value = '';
+        document.getElementById('newValue').value = '';
+    }
+}
+
+
+greenhouseForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(greenhouseForm);
+    const updatedData = {};
+
+    for (const [key, value] of formData.entries()) {
+        updatedData[key] = value;
+    }
+
+    const res = await fetch('/update-greenhouses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            client_name: currentClient,
+            greenhouses: [updatedData]  // wrap it back into an array
+        })
+    });
+
+    const result = await res.json();
+    alert(result.message);
+});
+
 
         fetchClients();
     </script>
