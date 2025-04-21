@@ -147,5 +147,116 @@
             }
         });
     </script>
+
+
+<h1>Greenhouse Manager</h1>
+
+    <form id="clientSelectForm">
+        <label>Select Client:
+            <select id="clientSelect" name="client">
+                <!-- Options will be populated dynamically -->
+            </select>
+        </label>
+        <button type="submit">Load Greenhouses</button>
+    </form>
+
+    <form id="greenhouseForm" style="display:none; margin-top: 20px;">
+        <div id="greenhouseFields"></div>
+
+        <h3>Add New Greenhouse</h3>
+        <input type="text" id="newKey" placeholder="New Greenhouse Key">
+        <input type="text" id="newValue" placeholder="New Greenhouse Name">
+        <button type="button" onclick="addNewGreenhouse()">Add</button><br><br>
+
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <script>
+        const clientSelect = document.getElementById('clientSelect');
+        const clientSelectForm = document.getElementById('clientSelectForm');
+        const greenhouseForm = document.getElementById('greenhouseForm');
+        const greenhouseFields = document.getElementById('greenhouseFields');
+
+        let currentClient = null;
+        let greenhouseData = {};
+
+        async function fetchClients() {
+            const res = await fetch('/clients');
+            const clients = await res.json();
+            clients.forEach(client => {
+                console.log(clients);
+                console.log(client);
+                const option = document.createElement('option');
+                option.value = client;
+                option.textContent = client;
+                clientSelect.appendChild(option);
+            });
+        }
+
+        clientSelectForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            currentClient = clientSelect.value;
+            const res = await fetch(`/get-greenhouses?client_name=${currentClient}`);
+            greenhouseData = await res.json();
+            greenhouseForm.style.display = 'block';
+            renderFields();
+        });
+
+        function renderFields() {
+    greenhouseFields.innerHTML = '';
+
+    const data = greenhouseData[0]; // access the object inside the array
+
+    for (const key in data) {
+        const input = document.createElement('input');
+        input.name = key;
+        input.value = data[key];
+        input.placeholder = key;
+        greenhouseFields.appendChild(document.createTextNode(`${key}: `));
+        greenhouseFields.appendChild(input);
+        greenhouseFields.appendChild(document.createElement('br'));
+    }
+}
+
+
+function addNewGreenhouse() {
+    const key = document.getElementById('newKey').value;
+    const value = document.getElementById('newValue').value;
+
+    if (key && value) {
+        greenhouseData[0][key] = value; // update the object inside the array
+        renderFields();
+        document.getElementById('newKey').value = '';
+        document.getElementById('newValue').value = '';
+    }
+}
+
+
+greenhouseForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(greenhouseForm);
+    const updatedData = {};
+
+    for (const [key, value] of formData.entries()) {
+        updatedData[key] = value;
+    }
+
+    const res = await fetch('/update-greenhouses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            client_name: currentClient,
+            greenhouses: [updatedData]  // wrap it back into an array
+        })
+    });
+
+    const result = await res.json();
+    alert(result.message);
+});
+
+
+        fetchClients();
+    </script>
 </body>
 </html>
