@@ -53,7 +53,7 @@ app = Starlette(
         Route("/", homepage),
         Route("/panel", panel),
         Mount("/statics", app=StaticFiles(directory="statics"), name="statics"),
-        Route("/get-max-copy", get_max_copy, methods=["POST"]),
+        Route("/get-max-copy", get_max_copy, methods=["GET"]),
     ]
 )
 
