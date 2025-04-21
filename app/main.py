@@ -24,7 +24,9 @@ def panel(request):
     )
 
 def greenhouse_panel(request):
-    return templates.TemplateResponse("greenhouse_panel.html", {"request": request})
+    return Jinja2Templates("templates").TemplateResponse(
+        "greenhouse_panel.html", {"request": request, "config": config}
+    )
 
 
 def get_max_copy(request: Request):
