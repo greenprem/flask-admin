@@ -32,8 +32,9 @@ def get_max_copy(request: Request):
     if not all([client_name, site, greenhouse, cycle_name]):
         return JSONResponse({"error": "Missing required parameters"}, status_code=400)
 
-    # Manually create the session (no 'with' statement here)
-    session = SessionLocal()
+    # Create a session object using the SessionLocal sessionmaker
+    session = SessionLocal()  # This is where you instantiate the session
+
     try:
         stmt = (
             select(func.max(Observation.copy))
@@ -44,11 +45,11 @@ def get_max_copy(request: Request):
                 Observation.cycle_name == cycle_name,
             )
         )
-        result = session.execute(stmt)
-        max_copy = result.scalar()
+        result = session.execute(stmt)  # Now, you can use 'session.execute'
+        max_copy = result.scalar()  # Extract the scalar value from the result
 
     finally:
-        session.close()  # Ensure the session is closed after usage
+        session.close()  # Close the session after use
 
     return JSONResponse({"max_copy": max_copy or 0})
 
