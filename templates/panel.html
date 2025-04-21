@@ -2,18 +2,119 @@
 <html>
 <head>
     <title>Observation Panel</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f8fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-weight: 600;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eaeaea;
+            font-size: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #4299e1;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+        }
+        
+        button {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2b6cb0;
+        }
+        
+        #result {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #ebf8ff;
+            border-radius: 4px;
+            border-left: 4px solid #4299e1;
+            display: none;
+        }
+        
+        #result.active {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-    <h1>Check Max Copy Number</h1>
-    <form id="observationForm">
-        <label>Client Name: <input type="text" name="client_name" required></label><br>
-        <label>Site: <input type="text" name="site" required></label><br>
-        <label>Greenhouse: <input type="text" name="greenhouse" required></label><br>
-        <label>Cycle Name: <input type="text" name="cycle_name" required></label><br>
-        <button type="submit">Check</button>
-    </form>
+    <div class="container">
+        <h1>Check Max Copy Number</h1>
+        <form id="observationForm">
+            <div class="form-group">
+                <label for="client_name">Client Name</label>
+                <input type="text" id="client_name" name="client_name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="site">Site</label>
+                <input type="text" id="site" name="site" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="greenhouse">Greenhouse</label>
+                <input type="text" id="greenhouse" name="greenhouse" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="cycle_name">Cycle Name</label>
+                <input type="text" id="cycle_name" name="cycle_name" required>
+            </div>
+            
+            <button type="submit">Check</button>
+        </form>
 
-    <div id="result" style="margin-top: 20px;"></div>
+        <div id="result"></div>
+    </div>
 
     <script>
         const form = document.getElementById('observationForm');
@@ -24,13 +125,26 @@
             const formData = new FormData(form);
             const params = new URLSearchParams(formData.entries());
 
-            // Make GET request with query parameters
-            const response = await fetch(`/get-max-copy?${params.toString()}`, {
-                method: 'GET',
-            });
+            // Show loading state
+            resultDiv.className = 'active';
+            resultDiv.innerHTML = '<p>Loading...</p>';
 
-            const data = await response.json();
-            resultDiv.innerHTML = `<strong>Max Copy Number:</strong> ${data.max_copy}`;
+            try {
+                // Make GET request with query parameters
+                const response = await fetch(`/get-max-copy?${params.toString()}`, {
+                    method: 'GET',
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<strong>Max Copy Number:</strong> ${data.max_copy}`;
+                } else {
+                    resultDiv.innerHTML = `<strong>Error:</strong> ${data.message || 'Failed to fetch data'}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<strong>Error:</strong> Unable to connect to the server';
+            }
         });
     </script>
 </body>
