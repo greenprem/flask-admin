@@ -98,8 +98,11 @@ class ObservationView(ModelView):
     ]
     exclude_fields_from_edit = ["client_name", "site", "greenhouse", "cycle_name"]
     
-    # Specify the custom template
-    list_template = "admin/custom_observation_list.html"
+    # If starlette_admin has hooks for rendering extra content
+    # For example:
+    def render_list_header_actions(self):
+        extra_button = '<a href="/admin/highest-copy" class="btn btn-primary">Find Highest Copy Value</a>'
+        return extra_button + super().render_list_header_actions()
     
     
     # Define form fields for the action
