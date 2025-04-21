@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Observation Panel</title>
+    <title>Greenhouse Management System</title>
     <style>
+        /* Global Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f8fa;
@@ -12,8 +13,8 @@
         }
         
         .container {
-            max-width: 600px;
-            margin: 40px auto;
+            max-width: 800px;
+            margin: 0 auto 40px;
             background: white;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -26,9 +27,17 @@
             font-weight: 600;
             padding-bottom: 15px;
             border-bottom: 2px solid #eaeaea;
-            font-size: 24px;
+            font-size: 28px;
         }
         
+        h3 {
+            color: #2c3e50;
+            margin-top: 25px;
+            font-weight: 500;
+            font-size: 18px;
+        }
+        
+        /* Form Styles */
         .form-group {
             margin-bottom: 20px;
         }
@@ -40,7 +49,7 @@
             color: #4a5568;
         }
         
-        input[type="text"] {
+        input[type="text"], select {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
@@ -50,7 +59,7 @@
             transition: border-color 0.3s;
         }
         
-        input[type="text"]:focus {
+        input[type="text"]:focus, select:focus {
             border-color: #4299e1;
             outline: none;
             box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
@@ -66,12 +75,70 @@
             font-size: 16px;
             font-weight: 600;
             transition: background-color 0.3s;
+            margin-top: 10px;
         }
         
         button:hover {
             background-color: #2b6cb0;
         }
         
+        button.secondary {
+            background-color: #718096;
+        }
+        
+        button.secondary:hover {
+            background-color: #4a5568;
+        }
+        
+        /* Greenhouse Form Styles */
+        #clientSelectForm {
+            margin-bottom: 20px;
+        }
+        
+        #clientSelectForm select {
+            display: inline-block;
+            width: auto;
+            min-width: 200px;
+            margin-right: 10px;
+        }
+        
+        #greenhouseForm {
+            padding-top: 20px;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        #greenhouseFields {
+            margin-bottom: 30px;
+        }
+        
+        .greenhouse-entry {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .greenhouse-entry input {
+            margin-right: 10px;
+        }
+        
+        .greenhouse-entry button {
+            padding: 8px 16px;
+            margin-top: 0;
+        }
+        
+        /* New Greenhouse Section */
+        .new-greenhouse {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .new-greenhouse input {
+            margin-right: 10px;
+            flex: 1;
+        }
+        
+        /* Result Display */
         #result {
             margin-top: 25px;
             padding: 15px;
@@ -84,94 +151,178 @@
         #result.active {
             display: block;
         }
+        
+        /* Tab-style feature selection */
+        .feature-tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+        
+        .feature-tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+        }
+        
+        .feature-tab.active {
+            border-bottom-color: #3182ce;
+            color: #3182ce;
+        }
+        
+        .feature-content {
+            display: none;
+        }
+        
+        .feature-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Check Max Copy Number</h1>
-        <form id="observationForm">
-            <div class="form-group">
-                <label for="client_name">Client Name</label>
-                <input type="text" id="client_name" name="client_name" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="site">Site</label>
-                <input type="text" id="site" name="site" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="greenhouse">Greenhouse</label>
-                <input type="text" id="greenhouse" name="greenhouse" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="cycle_name">Cycle Name</label>
-                <input type="text" id="cycle_name" name="cycle_name" required>
-            </div>
-            
-            <button type="submit">Check</button>
-        </form>
+        <h1>Greenhouse Management System</h1>
+        
+        <div class="feature-tabs">
+            <div class="feature-tab active" onclick="switchTab('manager')">Greenhouse Manager</div>
+            <div class="feature-tab" onclick="switchTab('observation')">Observation Panel</div>
+        </div>
+        
+        <!-- Greenhouse Manager Content -->
+        <div id="manager-content" class="feature-content active">
+            <form id="clientSelectForm">
+                <div class="form-group">
+                    <label for="clientSelect">Select Client:</label>
+                    <div style="display: flex; align-items: center;">
+                        <select id="clientSelect" name="client">
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                        <button type="submit" style="margin-left: 10px;">Load Greenhouses</button>
+                    </div>
+                </div>
+            </form>
 
-        <div id="result"></div>
+            <form id="greenhouseForm" style="display:none;">
+                <div id="greenhouseFields"></div>
+
+                <h3>Add New Greenhouse</h3>
+                <div class="new-greenhouse">
+                    <input type="text" id="newKey" placeholder="New Greenhouse Key">
+                    <input type="text" id="newValue" placeholder="New Greenhouse Name">
+                    <button type="button" onclick="addNewGreenhouse()">Add</button>
+                </div>
+
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+        
+        <!-- Observation Panel Content -->
+        <div id="observation-content" class="feature-content">
+            <h2>Check Max Copy Number</h2>
+            <form id="observationForm">
+                <div class="form-group">
+                    <label for="client_name">Client Name</label>
+                    <input type="text" id="client_name" name="client_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="site">Site</label>
+                    <input type="text" id="site" name="site" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="greenhouse">Greenhouse</label>
+                    <input type="text" id="greenhouse" name="greenhouse" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cycle_name">Cycle Name</label>
+                    <input type="text" id="cycle_name" name="cycle_name" required>
+                </div>
+                
+                <button type="submit">Check</button>
+            </form>
+
+            <div id="result"></div>
+        </div>
     </div>
 
     <script>
-        const form = document.getElementById('observationForm');
+        // Tab functionality
+        function switchTab(tabName) {
+            // Update tab classes
+            document.querySelectorAll('.feature-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.feature-tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            
+            // Update content visibility
+            document.querySelectorAll('.feature-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-content`).classList.add('active');
+        }
+        
+        // Observation Panel Script
+        const observationForm = document.getElementById('observationForm');
         const resultDiv = document.getElementById('result');
 
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const formData = new FormData(form);
-            const params = new URLSearchParams(formData.entries());
+        if (observationForm) {
+            observationForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData(observationForm);
+                const params = new URLSearchParams(formData.entries());
 
-            // Show loading state
-            resultDiv.className = 'active';
-            resultDiv.innerHTML = '<p>Loading...</p>';
+                // Show loading state
+                resultDiv.className = 'active';
+                resultDiv.innerHTML = '<p>Loading...</p>';
 
-            try {
-                // Make GET request with query parameters
-                const response = await fetch(`/get-max-copy?${params.toString()}`, {
-                    method: 'GET',
-                });
+                try {
+                    // Make GET request with query parameters
+                    const response = await fetch(`/get-max-copy?${params.toString()}`, {
+                        method: 'GET',
+                    });
 
-                const data = await response.json();
-                
-                if (response.ok) {
-                    resultDiv.innerHTML = `<strong>Max Copy Number:</strong> ${data.max_copy}`;
-                } else {
-                    resultDiv.innerHTML = `<strong>Error:</strong> ${data.message || 'Failed to fetch data'}`;
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML = `<strong>Max Copy Number:</strong> ${data.max_copy}`;
+                    } else {
+                        resultDiv.innerHTML = `<strong>Error:</strong> ${data.message || 'Failed to fetch data'}`;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML = '<strong>Error:</strong> Unable to connect to the server';
                 }
-            } catch (error) {
-                resultDiv.innerHTML = '<strong>Error:</strong> Unable to connect to the server';
+            });
+        }
+        
+        // Function to dynamically add greenhouse fields (placeholder for your implementation)
+        function addNewGreenhouse() {
+            const newKey = document.getElementById('newKey').value;
+            const newValue = document.getElementById('newValue').value;
+            
+            if (newKey && newValue) {
+                const greenhouseFields = document.getElementById('greenhouseFields');
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'greenhouse-entry';
+                
+                entryDiv.innerHTML = `
+                    <input type="text" value="${newKey}" readonly style="width: 40%;">
+                    <input type="text" value="${newValue}" style="width: 50%;">
+                    <button type="button" class="secondary" onclick="this.parentElement.remove()">Remove</button>
+                `;
+                
+                greenhouseFields.appendChild(entryDiv);
+                
+                // Clear input fields
+                document.getElementById('newKey').value = '';
+                document.getElementById('newValue').value = '';
             }
-        });
-    </script>
-
-
-<h1>Greenhouse Manager</h1>
-
-    <form id="clientSelectForm">
-        <label>Select Client:
-            <select id="clientSelect" name="client">
-                <!-- Options will be populated dynamically -->
-            </select>
-        </label>
-        <button type="submit">Load Greenhouses</button>
-    </form>
-
-    <form id="greenhouseForm" style="display:none; margin-top: 20px;">
-        <div id="greenhouseFields"></div>
-
-        <h3>Add New Greenhouse</h3>
-        <input type="text" id="newKey" placeholder="New Greenhouse Key">
-        <input type="text" id="newValue" placeholder="New Greenhouse Name">
-        <button type="button" onclick="addNewGreenhouse()">Add</button><br><br>
-
-        <button type="submit">Save Changes</button>
-    </form>
-
-    <script>
+        }
+        
+        // This is where your original script would go
+        // ...some script...
         const clientSelect = document.getElementById('clientSelect');
         const clientSelectForm = document.getElementById('clientSelectForm');
         const greenhouseForm = document.getElementById('greenhouseForm');
