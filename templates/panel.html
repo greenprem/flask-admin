@@ -178,11 +178,43 @@
         .feature-content.active {
             display: block;
         }
+
+        #greenhouseFields {
+    margin-bottom: 30px;
+}
+
+#greenhouseFields .greenhouse-entry {
+    display: flex;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+#greenhouseFields input[type="text"] {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.3s;
+    margin-right: 10px;
+}
+
+#greenhouseFields input[type="text"]:focus {
+    border-color: #4299e1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+#greenhouseFields input[readonly] {
+    background-color: #f7fafc;
+    color: #4a5568;
+    font-weight: 500;
+}
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Greenhouse Management System</h1>
+        <h1>Panel</h1>
         
         <div class="feature-tabs">
             <div class="feature-tab active" onclick="switchTab('manager')">Greenhouse Manager</div>
