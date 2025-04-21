@@ -30,6 +30,8 @@ def get_max_copy(request: Request):
     greenhouse = request.query_params.get("greenhouse")
     cycle_name = request.query_params.get("cycle_name")
 
+    print(f"client_name: {client_name}, site: {site}, greenhouse: {greenhouse}, cycle_name: {cycle_name}")
+
     if not all([client_name, site, greenhouse, cycle_name]):
         return JSONResponse({"error": "Missing required parameters"}, status_code=400)
 
