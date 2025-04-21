@@ -1,136 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            padding-top: 20px;
-            background-color: #f5f5f5;
-        }
-        .card {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .card-header {
-            background-color: #f8f9fa;
-        }
-        .result-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #28a745;
-        }
-    </style>
+    <title>Observation Panel</title>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mb-4">Admin Panel</h1>
-        
-        <!-- Highest Copy Value Widget -->
-        <div class="row mb-4">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">Find Highest Copy Value</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="post">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="form-group mb-3">
-                                        <label for="client_name">Client Name</label>
-                                        <select id="client_name" name="client_name" class="form-select">
-                                            <option value="">-- Select Client --</option>
-                                            {% for client in clients %}
-                                                <option value="{{ client }}">{{ client }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group mb-3">
-                                        <label for="site">Site</label>
-                                        <select id="site" name="site" class="form-select">
-                                            <option value="">-- Select Site --</option>
-                                            {% for site in sites %}
-                                                <option value="{{ site }}">{{ site }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group mb-3">
-                                        <label for="greenhouse">Greenhouse</label>
-                                        <select id="greenhouse" name="greenhouse" class="form-select">
-                                            <option value="">-- Select Greenhouse --</option>
-                                            {% for greenhouse in greenhouses %}
-                                                <option value="{{ greenhouse }}">{{ greenhouse }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group mb-3">
-                                        <label for="cycle_name">Cycle Name</label>
-                                        <select id="cycle_name" name="cycle_name" class="form-select">
-                                            <option value="">-- Select Cycle --</option>
-                                            {% for cycle in cycles %}
-                                                <option value="{{ cycle }}">{{ cycle }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-center mt-3">
-                                <button type="submit" class="btn btn-primary">Find Highest Copy Value</button>
-                            </div>
-                        </form>
-                        
-                        {% if highest_copy is not none %}
-                            <div class="alert alert-success mt-4">
-                                <h5>Result</h5>
-                                <p>{{ result_message }}</p>
-                                <div class="result-value">{{ highest_copy }}</div>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Add other panel features here -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">Admin Links</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            <a href="/admin" class="list-group-item list-group-item-action">Admin Dashboard</a>
-                            <a href="/admin/observations" class="list-group-item list-group-item-action">Observations</a>
-                            <!-- Add more admin links as needed -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <h1>Check Max Copy Number</h1>
+    <form id="observationForm">
+        <label>Client Name: <input type="text" name="client_name" required></label><br>
+        <label>Site: <input type="text" name="site" required></label><br>
+        <label>Greenhouse: <input type="text" name="greenhouse" required></label><br>
+        <label>Cycle Name: <input type="text" name="cycle_name" required></label><br>
+        <button type="submit">Check</button>
+    </form>
 
-    <!-- Optional JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <div id="result" style="margin-top: 20px;"></div>
+
     <script>
-        // Add any client-side JavaScript functionality here
-        document.addEventListener('DOMContentLoaded', function() {
-            // Example: Cascading dropdowns
-            const clientSelect = document.getElementById('client_name');
-            const siteSelect = document.getElementById('site');
-            
-            // You could enhance this with AJAX to load relevant options when a selection changes
-            // This would require additional endpoints to provide the filtered data
+        const form = document.getElementById('observationForm');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+
+            const response = await fetch('/get-max-copy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            resultDiv.innerHTML = `<strong>Max Copy Number:</strong> ${data.max_copy}`;
         });
     </script>
 </body>
