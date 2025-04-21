@@ -98,67 +98,9 @@ class ObservationView(ModelView):
     ]
     exclude_fields_from_edit = ["client_name", "site", "greenhouse", "cycle_name"]
     
-    @action(
-        name="highest_copy",
-        text="Find Highest Copy Value",
-        confirmation="Find the highest copy value for the selected filters?",
-        form=True
-        
-    )
-    async def highest_copy_action(self, request):
-        """Find the highest copy value based on selected filters"""
-        # Get form data
-        form_data = await request.form()
-        client_name = form_data.get("client_name", "")
-        site = form_data.get("site", "")
-        greenhouse = form_data.get("greenhouse", "")
-        cycle_name = form_data.get("cycle_name", "")
-
-        # Construct base query
-        query = select(func.max(self.model.copy)).select_from(self.model)
-        
-        # Apply filters if provided
-        filters_applied = False
-        if client_name:
-            query = query.filter(self.model.client_name == client_name)
-            filters_applied = True
-        if site:
-            query = query.filter(self.model.site == site)
-            filters_applied = True
-        if greenhouse:
-            query = query.filter(self.model.greenhouse == greenhouse)
-            filters_applied = True
-        if cycle_name:
-            query = query.filter(self.model.cycle_name == cycle_name)
-            filters_applied = True
-            
-        # Execute query
-        async with self.context.get_session() as session:
-            result = await session.execute(query)
-            highest_copy = result.scalar()
-        
-        # Prepare message
-        if filters_applied:
-            filter_description = []
-            if client_name:
-                filter_description.append(f"Client: {client_name}")
-            if site:
-                filter_description.append(f"Site: {site}")
-            if greenhouse:
-                filter_description.append(f"Greenhouse: {greenhouse}")
-            if cycle_name:
-                filter_description.append(f"Cycle: {cycle_name}")
-            
-            filter_text = ", ".join(filter_description)
-            message = f"Highest copy value for {filter_text}: {highest_copy}"
-        else:
-            message = f"Highest copy value overall: {highest_copy}"
-        
-        # Add message to flash and redirect back
-        self.context.flash(message, "success")
-        return RedirectResponse(
-            request.url_for(self.context.route_name, path=self.identity), status_code=302
-        )
+    # Specify the custom template
+    list_template = "admin/custom_observation_list.html"
+    
     
     # Define form fields for the action
     def get_actions(self):

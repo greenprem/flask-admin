@@ -1,0 +1,10 @@
+{% extends "starlette_admin/list.html" %}
+
+{% block list_header %}
+    <div class="mb-3">
+        <a href="{{ url_for('admin:highest_copy') }}" class="btn btn-primary">
+            Find Highest Copy Value
+        </a>
+    </div>
+    {{ super() }}
+{% endblock %}

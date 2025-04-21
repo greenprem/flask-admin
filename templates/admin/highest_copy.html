@@ -1,0 +1,65 @@
+{% extends "starlette_admin/base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Find Highest Copy Value</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="form-group mb-3">
+                            <label for="client_name">Client Name</label>
+                            <select id="client_name" name="client_name" class="form-control">
+                                <option value="">-- Select Client --</option>
+                                {% for client in clients %}
+                                    <option value="{{ client }}">{{ client }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="site">Site</label>
+                            <select id="site" name="site" class="form-control">
+                                <option value="">-- Select Site --</option>
+                                {% for site in sites %}
+                                    <option value="{{ site }}">{{ site }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="greenhouse">Greenhouse</label>
+                            <select id="greenhouse" name="greenhouse" class="form-control">
+                                <option value="">-- Select Greenhouse --</option>
+                                {% for greenhouse in greenhouses %}
+                                    <option value="{{ greenhouse }}">{{ greenhouse }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="cycle_name">Cycle Name</label>
+                            <select id="cycle_name" name="cycle_name" class="form-control">
+                                <option value="">-- Select Cycle --</option>
+                                {% for cycle in cycles %}
+                                    <option value="{{ cycle }}">{{ cycle }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Find</button>
+                    </form>
+                    {% if highest_copy is not none %}
+                        <div class="alert alert-success mt-3">
+                            <h5>Result</h5>
+                            <p>{{ result_message }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mt-3">
+                <a href="{{ url_for('admin:list', identity='observations') }}" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
