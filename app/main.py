@@ -94,7 +94,7 @@ async def highest_copy_view(request):
     
     # Render template
     return templates.TemplateResponse(
-        "admin/highest_copy.html", 
+        "templates/admin/highest_copy.html", 
         {
             "request": request,
             "clients": clients,
