@@ -26,7 +26,7 @@
 
             // Make GET request with query parameters
             const response = await fetch(`/get-max-copy?${params.toString()}`, {
-                method: 'GET',
+                method: 'POST',
             });
 
             const data = await response.json();
