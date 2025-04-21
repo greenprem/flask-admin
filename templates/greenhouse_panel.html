@@ -39,6 +39,8 @@
             const res = await fetch('/clients');
             const clients = await res.json();
             clients.forEach(client => {
+                console.log(clients);
+                console.log(client);
                 const option = document.createElement('option');
                 option.value = client;
                 option.textContent = client.client_name;
