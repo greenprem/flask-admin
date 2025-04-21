@@ -9,6 +9,8 @@ from app.db import SessionLocal
 from app.sqla.models import Observation
 from app.config import config
 from app.sqla import admin as admin_sqla
+import json
+
 
 def homepage(request):
     return Jinja2Templates("templates").TemplateResponse(
@@ -21,13 +23,16 @@ def panel(request):
     )
 
 def get_max_copy(request: Request):
-    data = request.json()  # No async needed here
+    # Use request.body() for synchronous JSON parsing
+    body = request.body()
+    data = json.loads(body)
+
     client_name = data.get("client_name")
     site = data.get("site")
     greenhouse = data.get("greenhouse")
     cycle_name = data.get("cycle_name")
 
-    # Synchronous session handling
+    # Synchronous database session handling
     with SessionLocal() as session:
         stmt = (
             select(func.max(Observation.copy))
