@@ -1,11 +1,14 @@
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.config import config
+from app.sqla.models import Base  # Assuming you have a Base model
 
-engine = create_async_engine(config.async_sqla_engine, echo=True)
+# Create a synchronous engine
+engine = create_engine(config.sqla_engine, echo=True)
 
+# Create a sessionmaker bound to the synchronous engine
 SessionLocal = sessionmaker(
     bind=engine,
-    class_=AsyncSession,
+    class_=sessionmaker,
     expire_on_commit=False,
 )

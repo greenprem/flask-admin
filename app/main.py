@@ -6,32 +6,29 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from sqlalchemy import select, func
 from app.db import SessionLocal
-from app.sqla.models import Observation  # adjust this import based on your structure
-
+from app.sqla.models import Observation
 from app.config import config
-# from app.mongoengine import admin as admin_mongo
-# from app.odmantic import admin as admin_odm
 from app.sqla import admin as admin_sqla
 
-
-async def homepage(request):
+def homepage(request):
     return Jinja2Templates("templates").TemplateResponse(
         "index.html", {"request": request, "config": config}
     )
 
-async def panel(request):
+def panel(request):
     return Jinja2Templates("templates").TemplateResponse(
         "panel.html", {"request": request, "config": config}
     )
 
-async def get_max_copy(request: Request):
-    data = await request.json()
+def get_max_copy(request: Request):
+    data = request.json()  # No async needed here
     client_name = data.get("client_name")
     site = data.get("site")
     greenhouse = data.get("greenhouse")
     cycle_name = data.get("cycle_name")
 
-    async with SessionLocal() as session:
+    # Synchronous session handling
+    with SessionLocal() as session:
         stmt = (
             select(func.max(Observation.copy))
             .where(
@@ -41,7 +38,7 @@ async def get_max_copy(request: Request):
                 Observation.cycle_name == cycle_name,
             )
         )
-        result = await session.execute(stmt)
+        result = session.execute(stmt)
         max_copy = result.scalar()
 
     return JSONResponse({"max_copy": max_copy or 0})
@@ -54,4 +51,5 @@ app = Starlette(
         Route("/get-max-copy", get_max_copy, methods=["POST"]),
     ]
 )
+
 admin_sqla.mount_to(app)
