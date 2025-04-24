@@ -14,58 +14,163 @@ from starlette_admin._types import RowActionsDisplayType
 from starlette_admin.actions import link_row_action, row_action
 from starlette_admin.contrib.sqla import ModelView
 from starlette_admin.exceptions import ActionFailed
+from starlette.requests import Request
+from starlette.responses import PlainTextResponse
+import json
+import httpx
+from typing import Any
 
 # from app.sqla.models import Client, SymptomThreshold, CycleInfo, Greenhouse, EnvData, Feedback, SensorRange, DiseaseData, BucketValues, PlantWeek, Observation, Grid, GridAnalysis, FeedBackGridImages, Weeks
 
 from app.sqla.models import Client
 
 class ClientView(ModelView):
-    row_actions = ["view", "edit", "edit_greenhouse",
-                   "delete"]  # edit, view and delete are provided by default
-    row_actions_display_type = RowActionsDisplayType.ICON_LIST  # RowActionsDisplayType.DROPDOWN
+    row_actions = ["view", "edit", "edit_greenhouse", "delete"]
+    row_actions_display_type = RowActionsDisplayType.ICON_LIST
     page_size = 10
 
-    # Fields to show in the table view
     fields = [
         "id", "client_name", "username", "password", "site_name", "greenhouse_name"
     ]
 
-    # Fields to search and sort by
     searchable_fields = ["client_name", "username"]
     sortable_fields = ["id", "client_name"]
-
-    # Make fields read-only in edit form
     exclude_fields_from_edit = ["client_name", "username", "password", "site_name", "greenhouse_name"]
 
     @row_action(
         name="edit_greenhouse",
         text="Edit Greenhouse",
-        confirmation="Are you sure you want to mark this article as published ?",
-        icon_class="fas fa-check-circle",
-        submit_btn_text="Yes, proceed",
+        confirmation=None,  # Removed confirmation as we'll use the form directly
+        icon_class="fas fa-leaf",  # Changed to a greenhouse-like icon
+        submit_btn_text="Save Changes",
         submit_btn_class="btn-success",
         action_btn_class="btn-info",
         form="""
-        <form>
-            <div class="mt-3">
-                <input type="text" class="form-control" name="example-text-input" placeholder="Enter value">
+        <div>
+            <h4>Greenhouse Manager for <span id="current-client"></span></h4>
+            
+            <div id="greenhouseFields" class="mb-3">
+                <!-- Greenhouse fields will be dynamically populated here -->
             </div>
-        </form>
+            
+            <div class="mt-3 mb-3">
+                <h5>Add New Field</h5>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="newKey" name="newKey" placeholder="Field Name">
+                    <input type="text" class="form-control" id="newValue" name="newValue" placeholder="Value">
+                    <button class="btn btn-outline-secondary" type="button" onclick="addNewGreenhouseField()">Add</button>
+                </div>
+            </div>
+
+            <input type="hidden" id="greenhouseData" name="greenhouseData">
+            
+            <script>
+                let greenhouseData = {};
+                
+                async function loadGreenhouseData() {
+                    const clientName = document.getElementById('current-client').textContent;
+                    const res = await fetch(`/get-greenhouses?client_name=${clientName}`);
+                    greenhouseData = await res.json();
+                    renderFields();
+                }
+                
+                function renderFields() {
+                    const fieldsContainer = document.getElementById('greenhouseFields');
+                    fieldsContainer.innerHTML = '';
+                    
+                    const data = greenhouseData[0]; // access the object inside the array
+                    
+                    for (const key in data) {
+                        const entryDiv = document.createElement('div');
+                        entryDiv.className = 'input-group mb-2';
+                        
+                        entryDiv.innerHTML = `
+                            <span class="input-group-text" style="width: 30%;">${key}</span>
+                            <input type="text" class="form-control gh-field" data-key="${key}" value="${data[key]}" style="width: 60%;">
+                            <button class="btn btn-outline-danger" type="button" onclick="removeField('${key}')">Remove</button>
+                        `;
+                        
+                        fieldsContainer.appendChild(entryDiv);
+                    }
+                    
+                    // Update hidden field with current data
+                    document.getElementById('greenhouseData').value = JSON.stringify(greenhouseData);
+                }
+                
+                function addNewGreenhouseField() {
+                    const key = document.getElementById('newKey').value;
+                    const value = document.getElementById('newValue').value;
+                    
+                    if (key && value) {
+                        greenhouseData[0][key] = value;
+                        renderFields();
+                        document.getElementById('newKey').value = '';
+                        document.getElementById('newValue').value = '';
+                    }
+                }
+                
+                function removeField(key) {
+                    delete greenhouseData[0][key];
+                    renderFields();
+                }
+                
+                // Update data when any field changes
+                document.addEventListener('change', function(e) {
+                    if (e.target.classList.contains('gh-field')) {
+                        const key = e.target.dataset.key;
+                        greenhouseData[0][key] = e.target.value;
+                        document.getElementById('greenhouseData').value = JSON.stringify(greenhouseData);
+                    }
+                });
+                
+                // Set the client name and load data when the form opens
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(loadGreenhouseData, 500); // Give a moment for the form to initialize
+                });
+            </script>
+        </div>
         """,
     )
     async def edit_greenhouse_row_action(self, request: Request, pk: Any) -> str:
-        # Write your logic here
+        try:
+            # Get the client record first
+            client = await self.find_by_pk(request, pk)
+            
+            # Set the current client name in the response context
+            response = PlainTextResponse(f"""
+                <script>
+                    document.getElementById('current-client').textContent = '{client.client_name}';
+                </script>
+            """)
+            
+            # Process form submission
+            if request.method == "POST":
+                data = await request.form()
+                greenhouse_data = json.loads(data.get("greenhouseData", "{}"))
+                
+                # Call your greenhouse update endpoint/function
+                await update_greenhouses(client.client_name, greenhouse_data)
+                
+                return "Greenhouse data successfully updated!"
+            
+            return response
+            
+        except Exception as e:
+            raise ActionFailed(f"Error updating greenhouse: {str(e)}")
 
-        data: FormData = await request.form()
-        user_input = data.get("example-text-input")
-
-        if ...:
-            # Display meaningfully error
-            raise ActionFailed("Sorry, We can't proceed this action now.")
-        # Display successfully message
-        return "The article was successfully marked as published"
-
-
+# Helper function to update greenhouses (implement based on your backend)
+async def update_greenhouses(client_name, greenhouse_data):
+    # Make API call or database update as needed
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "/update-greenhouses",
+            json={
+                "client_name": client_name,
+                "greenhouses": greenhouse_data
+            }
+        )
+        if response.status_code != 200:
+            raise Exception(f"Failed to update: {response.text}")
 
     
 
