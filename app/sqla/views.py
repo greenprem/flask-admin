@@ -40,8 +40,8 @@ class ClientView(ModelView):
     @row_action(
         name="edit_greenhouse",
         text="Edit Greenhouse",
-        confirmation=None,
-        icon_class="fas fa-leaf",
+        confirmation=None,  # Removed confirmation as we'll use the form directly
+        icon_class="fas fa-leaf",  # Changed to a greenhouse-like icon
         submit_btn_text="Save Changes",
         submit_btn_class="btn-success",
         action_btn_class="btn-info",
@@ -52,11 +52,6 @@ class ClientView(ModelView):
             
             <div id="greenhouseFields" class="mb-3">
                 <!-- Greenhouse fields will be dynamically populated here -->
-                <div class="text-center py-3">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
             </div>
             
             <div class="mt-3 mb-3">
@@ -71,35 +66,18 @@ class ClientView(ModelView):
             <input type="hidden" id="greenhouseData" name="greenhouseData">
             
             <script>
-                // Initialize with the client name from the row data
-                document.getElementById('current-client').textContent = '{{client_name}}';
-                
                 let greenhouseData = {};
                 
                 async function loadGreenhouseData() {
                     const clientName = document.getElementById('current-client').textContent;
-                    try {
-                        const res = await fetch(`/get-greenhouses?client_name=${clientName}`);
-                        if (!res.ok) {
-                            throw new Error(`Failed to fetch: ${res.status}`);
-                        }
-                        greenhouseData = await res.json();
-                        renderFields();
-                    } catch (error) {
-                        document.getElementById('greenhouseFields').innerHTML = 
-                            `<div class="alert alert-danger">Error loading data: ${error.message}</div>`;
-                    }
+                    const res = await fetch(`/get-greenhouses?client_name=${clientName}`);
+                    greenhouseData = await res.json();
+                    renderFields();
                 }
                 
                 function renderFields() {
                     const fieldsContainer = document.getElementById('greenhouseFields');
                     fieldsContainer.innerHTML = '';
-                    
-                    if (!greenhouseData || !greenhouseData[0]) {
-                        fieldsContainer.innerHTML = '<div class="alert alert-info">No greenhouse data found</div>';
-                        greenhouseData = [{}]; // Initialize with empty object in array
-                        return;
-                    }
                     
                     const data = greenhouseData[0]; // access the object inside the array
                     
@@ -125,9 +103,6 @@ class ClientView(ModelView):
                     const value = document.getElementById('newValue').value;
                     
                     if (key && value) {
-                        if (!greenhouseData[0]) {
-                            greenhouseData[0] = {};
-                        }
                         greenhouseData[0][key] = value;
                         renderFields();
                         document.getElementById('newKey').value = '';
@@ -149,8 +124,10 @@ class ClientView(ModelView):
                     }
                 });
                 
-                // Load data when the form opens
-                loadGreenhouseData();
+                // Set the client name and load data when the form opens
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(loadGreenhouseData, 500); // Give a moment for the form to initialize
+                });
             </script>
         </div>
         """,
@@ -160,30 +137,29 @@ class ClientView(ModelView):
             # Get the client record first
             client = await self.find_by_pk(request, pk)
             
-            # For GET requests, we return template with the client name
-            if request.method == "GET":
-                # Replace placeholder in the form template
-                form_template = self.row_actions_registry["edit_greenhouse"].form.replace(
-                    "{{client_name}}", client.client_name
-                )
-                return form_template
-                
-            # Process form submission for POST
+            # Set the current client name in the response context
+            # response = PlainTextResponse(f"""
+            #     <script>
+            #         document.getElementById('current-client').textContent = '{client.client_name}';
+            #     </script>
+            # """)
+            
+            # Process form submission
             if request.method == "POST":
                 data = await request.form()
-                greenhouse_data = json.loads(data.get("greenhouseData", "[]"))
+                greenhouse_data = json.loads(data.get("greenhouseData", "{}"))
                 
                 # Call your greenhouse update endpoint/function
                 await update_greenhouses(client.client_name, greenhouse_data)
                 
                 return "Greenhouse data successfully updated!"
             
-            return "Invalid request method"
+            return
             
         except Exception as e:
             raise ActionFailed(f"Error updating greenhouse: {str(e)}")
 
-# Helper function to update greenhouses
+# Helper function to update greenhouses (implement based on your backend)
 async def update_greenhouses(client_name, greenhouse_data):
     # Make API call or database update as needed
     async with httpx.AsyncClient() as client:
