@@ -32,6 +32,7 @@ class ClientView(ModelView):
         name="hello_action",
         text="Hello",
         confirmation="Say Hello?",
+        custom_response=True,
         submit_btn_class="btn-primary",
     )
     async def hello_action(self, request: Request, pks: list):
