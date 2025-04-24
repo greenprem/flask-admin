@@ -72,10 +72,10 @@ class ClientView(ModelView):
         <h3 class="mb-3">Add New Greenhouse</h3>
         <div class="new-greenhouse row g-3 mb-3">
             <div class="col-md-4">
-                <input type="text" id="newKey" placeholder="New Greenhouse Key" class="form-control">
+                <input type="text" id="newKey" placeholder="Key" class="form-control">
             </div>
             <div class="col-md-4">
-                <input type="text" id="newValue" placeholder="New Greenhouse Name" class="form-control">
+                <input type="text" id="newValue" placeholder="Name" class="form-control">
             </div>
             <div class="col-md-4">
                 <button type="button" onclick="addNewGreenhouse()" class="btn btn-success">Add</button>
