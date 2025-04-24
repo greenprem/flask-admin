@@ -47,32 +47,38 @@ class ClientView(ModelView):
         action_btn_class="btn-info",
         form="""
                 <!-- Greenhouse Manager Content -->
-        <div id="manager-content" class="feature-content active">
-            <form id="clientSelectForm">
-                <div class="form-group">
-                    <label for="clientSelect">Select Client:</label>
-                    <div style="display: flex; align-items: center;">
-                        <select id="clientSelect" name="client">
-                            <!-- Options will be populated dynamically -->
-                        </select>
-                        <button type="submit" style="margin-left: 10px;">Load Greenhouses</button>
-                    </div>
-                </div>
-            </form>
-
-            <form id="greenhouseForm" style="display:none;">
-                <div id="greenhouseFields"></div>
-
-                <h3>Add New Greenhouse</h3>
-                <div class="new-greenhouse">
-                    <input type="text" id="newKey" placeholder="New Greenhouse Key">
-                    <input type="text" id="newValue" placeholder="New Greenhouse Name">
-                    <button type="button" onclick="addNewGreenhouse()">Add</button>
-                </div>
-
-                <button type="submit">Save Changes</button>
-            </form>
+<div id="manager-content" class="feature-content active card p-4">
+    <form id="clientSelectForm">
+        <div class="form-group mb-3">
+            <label for="clientSelect" class="form-label">Select Client:</label>
+            <div class="d-flex align-items-center">
+                <select id="clientSelect" name="client" class="form-select me-2">
+                    <!-- Options will be populated dynamically -->
+                </select>
+                <button type="submit" class="btn btn-primary">Load Greenhouses</button>
+            </div>
         </div>
+    </form>
+
+    <form id="greenhouseForm" class="mt-4" style="display:none;">
+        <div id="greenhouseFields" class="mb-4"></div>
+
+        <h3 class="mb-3">Add New Greenhouse</h3>
+        <div class="new-greenhouse row g-3 mb-3">
+            <div class="col-md-4">
+                <input type="text" id="newKey" placeholder="New Greenhouse Key" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <input type="text" id="newValue" placeholder="New Greenhouse Name" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <button type="button" onclick="addNewGreenhouse()" class="btn btn-success">Add</button>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+    </form>
+</div>
         <script>
         // Function to dynamically add greenhouse fields (placeholder for your implementation)
         function addNewGreenhouse() {
