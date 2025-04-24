@@ -133,31 +133,16 @@ class ClientView(ModelView):
         """,
     )
     async def edit_greenhouse_row_action(self, request: Request, pk: Any) -> str:
-        try:
-            # Get the client record first
-            client = await self.find_by_pk(request, pk)
-            
-            # Set the current client name in the response context
-            # response = PlainTextResponse(f"""
-            #     <script>
-            #         document.getElementById('current-client').textContent = '{client.client_name}';
-            #     </script>
-            # """)
-            
-            # Process form submission
-            if request.method == "POST":
-                data = await request.form()
-                greenhouse_data = json.loads(data.get("greenhouseData", "{}"))
-                
-                # Call your greenhouse update endpoint/function
-                await update_greenhouses(client.client_name, greenhouse_data)
-                
-                return "Greenhouse data successfully updated!"
-            
-            return
-            
-        except Exception as e:
-            raise ActionFailed(f"Error updating greenhouse: {str(e)}")
+        # Write your logic here
+
+        data: FormData = await request.form()
+        user_input = data.get("example-text-input")
+
+        if ...:
+            # Display meaningfully error
+            raise ActionFailed("Sorry, We can't proceed this action now.")
+        # Display successfully message
+        return "The article was successfully marked as published"
 
 # Helper function to update greenhouses (implement based on your backend)
 async def update_greenhouses(client_name, greenhouse_data):
