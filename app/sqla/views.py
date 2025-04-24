@@ -37,7 +37,7 @@ class ClientView(ModelView):
     # Make fields read-only in edit form
     exclude_fields_from_edit = ["client_name", "username", "password", "site_name", "greenhouse_name"]
 
-     @row_action(
+    @row_action(
         name="make_published",
         text="Mark as published",
         confirmation="Are you sure you want to mark this article as published ?",
