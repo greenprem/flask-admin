@@ -40,7 +40,7 @@ class ClientView(ModelView):
     @row_action(
         name="make_published",
         text="Mark as published",
-        confirmation="Are you sure you want to mark this article as published ?",
+        confirmation="Edit Greenhouses of clients",
         icon_class="fas fa-check-circle",
         submit_btn_text="Yes, proceed",
         submit_btn_class="btn-success",
