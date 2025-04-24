@@ -45,7 +45,7 @@ class ClientView(ModelView):
         submit_btn_text="Yes, proceed",
         submit_btn_class="btn-success",
         action_btn_class="btn-info",
-        form="""
+        form=lambda instance: f"""
                 <!-- Greenhouse Manager Content -->
 <div id="manager-content" class="feature-content active card p-4">
     <form id="clientSelectForm">
@@ -55,7 +55,7 @@ class ClientView(ModelView):
                 <select id="clientSelect" name="client" class="form-select me-2">
                     <!-- Options will be populated dynamically -->
                 </select>
-                <button type="submit" class="btn btn-primary">Load Greenhouses</button>
+                <button type="submit" class="btn btn-primary">Load {instance.client_name} Greenhouses</button>
             </div>
         </div>
     </form>
