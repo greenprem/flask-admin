@@ -146,6 +146,7 @@ class ClientView(ModelView):
         input.name = key;
         input.value = data[key];
         input.placeholder = key;
+        input.className = 'form-control';
         greenhouseFields.appendChild(document.createTextNode(`${key}: `));
         greenhouseFields.appendChild(input);
         greenhouseFields.appendChild(document.createElement('br'));
