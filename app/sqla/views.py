@@ -83,6 +83,7 @@ class ClientView(ModelView):
         </div>
 
         <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+        <button class="btn btn-primary mt-3" onclick="window.location.reload()">Close</button>
     </form>
 </div>
         <script>
