@@ -45,7 +45,6 @@ class ClientView(ModelView):
         submit_btn_text="Save Changes",
         submit_btn_class="btn-success",
         action_btn_class="btn-info",
-        custom_response=True,
         form="""
         <div>
             <h4>Greenhouse Manager for <span id="current-client"></span></h4>
@@ -138,10 +137,7 @@ class ClientView(ModelView):
         data: FormData = await request.form()
         user_input = data.get("example-text-input")
 
-        if ...:
-            # Display meaningfully error
-            raise ActionFailed("Sorry, We can't proceed this action now.")
-        # Display successfully message
+        
         return "The article was successfully marked as published"
 
 # Helper function to update greenhouses (implement based on your backend)
