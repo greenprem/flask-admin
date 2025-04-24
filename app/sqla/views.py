@@ -20,7 +20,7 @@ from starlette_admin.exceptions import ActionFailed
 from app.sqla.models import Client
 
 class ClientView(ModelView):
-    row_actions = ["view", "edit", "go_to_example", "make_published",
+    row_actions = ["view", "edit", "make_published",
                    "delete"]  # edit, view and delete are provided by default
     row_actions_display_type = RowActionsDisplayType.ICON_LIST  # RowActionsDisplayType.DROPDOWN
     page_size = 10
@@ -65,13 +65,7 @@ class ClientView(ModelView):
         # Display successfully message
         return "The article was successfully marked as published"
 
-    @link_row_action(
-        name="go_to_example",
-        text="Go to example.com",
-        icon_class="fas fa-arrow-up-right-from-square",
-    )
-    def go_to_example_row_action(self, request: Request, pk: Any) -> str:
-        return f"https://example.com/?pk={pk}"
+
 
     
 
