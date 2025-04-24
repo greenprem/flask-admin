@@ -46,6 +46,12 @@ class ClientView(ModelView):
         submit_btn_class="btn-success",
         action_btn_class="btn-info",
         form="""
+        <style>
+    .modal-footer button[data-bs-dismiss="modal"] {
+        display: none !important;
+    }
+</style>
+
                 <!-- Greenhouse Manager Content -->
 <div id="manager-content" class="feature-content active card p-4">
     <form id="clientSelectForm">
