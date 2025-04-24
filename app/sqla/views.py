@@ -1,6 +1,7 @@
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette_admin.exceptions import FormValidationError
 from starlette_admin import RowActionsDisplayType
+from starlette.responses import HTMLResponse
 from starlette.requests import Request
 from typing import Any, Dict
 from starlette.responses import JSONResponse, RedirectResponse
@@ -25,6 +26,25 @@ class ClientView(ModelView):
 
     # Make fields read-only in edit form
     exclude_fields_from_edit = ["client_name", "username", "password", "site_name", "greenhouse_name"]
+
+    # Add custom action
+    @action(
+        name="hello_action",
+        text="Hello",
+        confirmation_text="Say Hello?",
+        btn_class="btn-primary",
+        icon_class="fa fa-bell",
+    )
+    async def hello_action(self, request: Request, pks: list):
+        # This action could be triggered for multiple rows, but for our demo
+        # we'll just acknowledge the action with a simple message
+        return HTMLResponse("""
+        <script>
+            alert('Hello World');
+            // Return to the list page
+            window.location.href = window.location.pathname;
+        </script>
+        """)
 
 # class SymptomThresholdView(ModelView):
 #     page_size = 10
