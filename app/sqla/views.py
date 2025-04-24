@@ -45,6 +45,7 @@ class ClientView(ModelView):
         submit_btn_text="Save Changes",
         submit_btn_class="btn-success",
         action_btn_class="btn-info",
+        custom_response=True,
         form="""
         <div>
             <h4>Greenhouse Manager for <span id="current-client"></span></h4>
