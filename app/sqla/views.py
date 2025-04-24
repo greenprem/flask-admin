@@ -31,7 +31,7 @@ class ClientView(ModelView):
     @action(
         name="hello_action",
         text="Hello",
-        confirmation_text="Say Hello?",
+        confirmation="Say Hello?",
         btn_class="btn-primary",
         icon_class="fa fa-bell",
     )
