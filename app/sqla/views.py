@@ -1,18 +1,28 @@
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette_admin.exceptions import FormValidationError
-from starlette_admin import RowActionsDisplayType
-from starlette.responses import HTMLResponse
 from starlette.requests import Request
 from typing import Any, Dict
 from starlette.responses import JSONResponse, RedirectResponse
 from sqlalchemy import func, select
 from starlette_admin import action
+from typing import Any
+
+from starlette.datastructures import FormData
+from starlette.requests import Request
+
+from starlette_admin._types import RowActionsDisplayType
+from starlette_admin.actions import link_row_action, row_action
+from starlette_admin.contrib.sqla import ModelView
+from starlette_admin.exceptions import ActionFailed
 
 # from app.sqla.models import Client, SymptomThreshold, CycleInfo, Greenhouse, EnvData, Feedback, SensorRange, DiseaseData, BucketValues, PlantWeek, Observation, Grid, GridAnalysis, FeedBackGridImages, Weeks
 
 from app.sqla.models import Client
 
 class ClientView(ModelView):
+    row_actions = ["view", "edit", "go_to_example", "make_published",
+                   "delete"]  # edit, view and delete are provided by default
+    row_actions_display_type = RowActionsDisplayType.ICON_LIST  # RowActionsDisplayType.DROPDOWN
     page_size = 10
 
     # Fields to show in the table view
@@ -27,24 +37,43 @@ class ClientView(ModelView):
     # Make fields read-only in edit form
     exclude_fields_from_edit = ["client_name", "username", "password", "site_name", "greenhouse_name"]
 
-    # Add custom action
-    @action(
-        name="hello_action",
-        text="Hello",
-        confirmation="Say Hello?",
-        custom_response=True,
-        submit_btn_class="btn-primary",
+     @row_action(
+        name="make_published",
+        text="Mark as published",
+        confirmation="Are you sure you want to mark this article as published ?",
+        icon_class="fas fa-check-circle",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        action_btn_class="btn-info",
+        form="""
+        <form>
+            <div class="mt-3">
+                <input type="text" class="form-control" name="example-text-input" placeholder="Enter value">
+            </div>
+        </form>
+        """,
     )
-    async def hello_action(self, request: Request, pks: list):
-        # This action could be triggered for multiple rows, but for our demo
-        # we'll just acknowledge the action with a simple message
-        return HTMLResponse("""
-        <script>
-            alert('Hello World');
-            // Return to the list page
-            window.location.href = window.location.pathname;
-        </script>
-        """)
+    async def make_published_row_action(self, request: Request, pk: Any) -> str:
+        # Write your logic here
+
+        data: FormData = await request.form()
+        user_input = data.get("example-text-input")
+
+        if ...:
+            # Display meaningfully error
+            raise ActionFailed("Sorry, We can't proceed this action now.")
+        # Display successfully message
+        return "The article was successfully marked as published"
+
+    @link_row_action(
+        name="go_to_example",
+        text="Go to example.com",
+        icon_class="fas fa-arrow-up-right-from-square",
+    )
+    def go_to_example_row_action(self, request: Request, pk: Any) -> str:
+        return f"https://example.com/?pk={pk}"
+
+    
 
 # class SymptomThresholdView(ModelView):
 #     page_size = 10
