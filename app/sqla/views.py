@@ -20,7 +20,7 @@ from starlette_admin.exceptions import ActionFailed
 from app.sqla.models import Client
 
 class ClientView(ModelView):
-    row_actions = ["view", "edit", "make_published",
+    row_actions = ["view", "edit", "edit_greenhouse",
                    "delete"]  # edit, view and delete are provided by default
     row_actions_display_type = RowActionsDisplayType.ICON_LIST  # RowActionsDisplayType.DROPDOWN
     page_size = 10
@@ -38,8 +38,8 @@ class ClientView(ModelView):
     exclude_fields_from_edit = ["client_name", "username", "password", "site_name", "greenhouse_name"]
 
     @row_action(
-        name="make_published",
-        text="Mark as published",
+        name="edit_greenhouse",
+        text="Edit Greenhouse",
         confirmation="Are you sure you want to mark this article as published ?",
         icon_class="fas fa-check-circle",
         submit_btn_text="Yes, proceed",
@@ -53,7 +53,7 @@ class ClientView(ModelView):
         </form>
         """,
     )
-    async def make_published_row_action(self, request: Request, pk: Any) -> str:
+    async def edit_greenhouse_row_action(self, request: Request, pk: Any) -> str:
         # Write your logic here
 
         data: FormData = await request.form()
