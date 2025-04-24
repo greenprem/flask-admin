@@ -78,7 +78,7 @@ class ClientView(ModelView):
 
         <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
     </form>
-</div>
+</div>"""+"""
         <script>
         // Function to dynamically add greenhouse fields (placeholder for your implementation)
         function addNewGreenhouse() {
