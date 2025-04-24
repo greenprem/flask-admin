@@ -32,8 +32,7 @@ class ClientView(ModelView):
         name="hello_action",
         text="Hello",
         confirmation="Say Hello?",
-        btn_class="btn-primary",
-        icon_class="fa fa-bell",
+        submit_btn_class="btn-primary",
     )
     async def hello_action(self, request: Request, pks: list):
         # This action could be triggered for multiple rows, but for our demo
