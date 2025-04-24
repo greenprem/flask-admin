@@ -242,7 +242,7 @@ async def update_greenhouses(request: Request):
     client_name = data.get("client_name")
     greenhouses = data.get("greenhouses")
 
-    if not client_name or not isinstance(greenhouses, dict):
+    if not client_name or not isinstance(greenhouses, list):
         print(client_name, greenhouses)
         print(type(greenhouses), type(client_name))
         return JSONResponse({"error": "Invalid data"}, status_code=400)
