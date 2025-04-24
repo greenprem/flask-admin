@@ -82,12 +82,12 @@ class ClientView(ModelView):
         <script>
         // Function to dynamically add greenhouse fields (placeholder for your implementation)
         function addNewGreenhouse() {
-            const newKey = document.getElementById('newKey').value;
-            const newValue = document.getElementById('newValue').value;
+            var newKey = document.getElementById('newKey').value;
+            var newValue = document.getElementById('newValue').value;
             
             if (newKey && newValue) {
-                const greenhouseFields = document.getElementById('greenhouseFields');
-                const entryDiv = document.createElement('div');
+                var greenhouseFields = document.getElementById('greenhouseFields');
+                var entryDiv = document.createElement('div');
                 entryDiv.className = 'greenhouse-entry';
                 
                 entryDiv.innerHTML = `
@@ -106,21 +106,21 @@ class ClientView(ModelView):
         
         // This is where your original script would go
         // ...some script...
-        const clientSelect = document.getElementById('clientSelect');
-        const clientSelectForm = document.getElementById('clientSelectForm');
-        const greenhouseForm = document.getElementById('greenhouseForm');
-        const greenhouseFields = document.getElementById('greenhouseFields');
+        var clientSelect = document.getElementById('clientSelect');
+        var clientSelectForm = document.getElementById('clientSelectForm');
+        var greenhouseForm = document.getElementById('greenhouseForm');
+        var greenhouseFields = document.getElementById('greenhouseFields');
 
         let currentClient = null;
         let greenhouseData = {};
 
         async function fetchClients() {
-            const res = await fetch('/clients');
-            const clients = await res.json();
+            var res = await fetch('/clients');
+            var clients = await res.json();
             clients.forEach(client => {
                 console.log(clients);
                 console.log(client);
-                const option = document.createElement('option');
+                var option = document.createElement('option');
                 option.value = client;
                 option.textContent = client;
                 clientSelect.appendChild(option);
@@ -130,7 +130,7 @@ class ClientView(ModelView):
         clientSelectForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             currentClient = clientSelect.value;
-            const res = await fetch(`/get-greenhouses?client_name=${currentClient}`);
+            var res = await fetch(`/get-greenhouses?client_name=${currentClient}`);
             greenhouseData = await res.json();
             greenhouseForm.style.display = 'block';
             renderFields();
@@ -139,10 +139,10 @@ class ClientView(ModelView):
         function renderFields() {
     greenhouseFields.innerHTML = '';
 
-    const data = greenhouseData[0]; // access the object inside the array
+    var data = greenhouseData[0]; // access the object inside the array
 
-    for (const key in data) {
-        const input = document.createElement('input');
+    for (var key in data) {
+        var input = document.createElement('input');
         input.name = key;
         input.value = data[key];
         input.placeholder = key;
@@ -155,8 +155,8 @@ class ClientView(ModelView):
 
 
 function addNewGreenhouse() {
-    const key = document.getElementById('newKey').value;
-    const value = document.getElementById('newValue').value;
+    var key = document.getElementById('newKey').value;
+    var value = document.getElementById('newValue').value;
 
     if (key && value) {
         greenhouseData[0][key] = value; // update the object inside the array
@@ -170,14 +170,14 @@ function addNewGreenhouse() {
 greenhouseForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const formData = new FormData(greenhouseForm);
-    const updatedData = {};
+    var formData = new FormData(greenhouseForm);
+    var updatedData = {};
 
-    for (const [key, value] of formData.entries()) {
+    for (var [key, value] of formData.entries()) {
         updatedData[key] = value;
     }
 
-    const res = await fetch('/update-greenhouses', {
+    var res = await fetch('/update-greenhouses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -186,7 +186,7 @@ greenhouseForm.addEventListener('submit', async (e) => {
         })
     });
 
-    const result = await res.json();
+    var result = await res.json();
     alert(result.message);
 });
 
