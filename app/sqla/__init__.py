@@ -46,7 +46,7 @@ admin = Admin(
 )
 
 # Register only Client view
-admin.add_view(ClientView(Client, icon="fa fa-id-badge", label="Clients"))
+#admin.add_view(ClientView(Client, icon="fa fa-id-badge", label="Clients"))
 #admin.add_view(ModelView(SymptomThreshold, icon="fa fa-id-badge", label="Symptom Threshold"))
 admin.add_view(CycleInfoView(CycleInfo, icon="fa fa-id-badge", label="Cycle Info"))
 admin.add_view(EnvDataView(EnvData, icon="fa fa-id-badge", label="Env Data"))
