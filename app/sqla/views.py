@@ -406,5 +406,5 @@ class HomeView(CustomView):
     async def render(self, request: Request, templates: Jinja2Templates) -> Response:
 
         return templates.TemplateResponse(
-            "greenhouse_panel.html", {"request": request}
+            "home.html", {"request": request}
         )
