@@ -15,6 +15,7 @@ from starlette_admin.actions import link_row_action, row_action
 from starlette_admin.contrib.sqla import ModelView
 from starlette_admin.exceptions import ActionFailed
 from starlette.requests import Request
+from starlette.responses import Response
 from starlette.responses import PlainTextResponse
 import json
 import httpx
@@ -402,8 +403,8 @@ class GridAnalysisView(ModelView):
 #     sortable_fields = [Weeks.id, Weeks.number]
 
 class HomeView(CustomView):
-    async def render(self ) :
+    async def render(self, request: Request, templates: Jinja2Templates) -> Response:
 
-        return Jinja2Templates.TemplateResponse(
-            "greenhouse_panel.html"
+        return templates.TemplateResponse(
+            "home.html", {"request": request}
         )
