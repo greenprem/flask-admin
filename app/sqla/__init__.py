@@ -17,7 +17,7 @@ from app.config import config
 from app.sqla.auth import MyAuthProvider
 from app.sqla.models import Client, CycleInfo, EnvData, SensorRange, DiseaseData, BucketValues, PlantWeek, Observation, Grid, GridAnalysis
 #from app.sqla.views import ClientView, SymptomThresholdView, CycleInfoView, EnvDataView, FeedbackView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, FeedBackGridImagesView, WeeksView
-from app.sqla.views import ClientView, CycleInfoView, EnvDataView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView
+from app.sqla.views import ClientView, CycleInfoView, EnvDataView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, HomeView
 __all__ = ["engine", "admin"]
 
 # Save avatar to local Storage
@@ -39,7 +39,7 @@ admin = Admin(
     base_url="/admin/sqla",
     route_name="admin-sqla",
     templates_dir="templates/admin/sqla",
-    index_view=None,  # Removed HomeView
+    index_view=HomeView(label="Home", icon="fa fa-home"),
     auth_provider=MyAuthProvider(login_path="/sign-in", logout_path="/sign-out"),
     middlewares=[Middleware(SessionMiddleware, secret_key=config.secret)],
     i18n_config=I18nConfig(default_locale="en", language_switcher=SUPPORTED_LOCALES),
