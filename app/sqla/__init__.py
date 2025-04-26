@@ -39,7 +39,7 @@ admin = Admin(
     base_url="/admin/sqla",
     route_name="admin-sqla",
     templates_dir="templates/admin/sqla",
-    index_view=HomeView(label="Home", icon="fa fa-home"),
+    index_view=HomeView(label="Greenhouse Manager", icon="fa fa-home"),
     auth_provider=MyAuthProvider(login_path="/sign-in", logout_path="/sign-out"),
     middlewares=[Middleware(SessionMiddleware, secret_key=config.secret)],
     i18n_config=I18nConfig(default_locale="en", language_switcher=SUPPORTED_LOCALES),
