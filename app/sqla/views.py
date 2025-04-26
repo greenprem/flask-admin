@@ -14,6 +14,8 @@ from starlette_admin._types import RowActionsDisplayType
 from starlette_admin.actions import link_row_action, row_action
 from starlette_admin.contrib.sqla import ModelView
 from starlette_admin.exceptions import ActionFailed
+from fastapi.responses import HTMLResponse
+
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 import json
@@ -25,7 +27,8 @@ from typing import Any
 from app.sqla.models import Client
 
 class ClientView(ModelView):
-    row_actions = ["view", "edit", "make_published", "delete"]
+    # Original configuration for client list view - these still needed for other views
+    row_actions = ["view", "edit", "delete"]
     row_actions_display_type = RowActionsDisplayType.ICON_LIST
     page_size = 10
 
@@ -36,185 +39,217 @@ class ClientView(ModelView):
     searchable_fields = ["client_name", "username"]
     sortable_fields = ["id", "client_name"]
     exclude_fields_from_edit = ["client_name", "username", "password", "site_name", "greenhouse_name"]
+    
+    # Override the default list view to show our greenhouse manager instead
+    async def list_view(self, request: Request) -> HTMLResponse:
+        return HTMLResponse(content=self._get_greenhouse_manager_html())
+    
+    def _get_greenhouse_manager_html(self) -> str:
+        """Returns the HTML content for the greenhouse manager page"""
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Greenhouse Manager</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        </head>
+        <body>
+            <div class="container-fluid p-0">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Greenhouse Manager</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Greenhouse Manager Content -->
+                                <div id="manager-content" class="feature-content active">
+                                    <form id="clientSelectForm">
+                                        <div class="form-group mb-3">
+                                            <label for="clientSelect" class="form-label">Select Client:</label>
+                                            <div class="d-flex align-items-center">
+                                                <select id="clientSelect" name="client" class="form-select me-2">
+                                                    <!-- Options will be populated dynamically -->
+                                                </select>
+                                                <button type="submit" class="btn btn-primary">Load Greenhouses</button>
+                                            </div>
+                                        </div>
+                                    </form>
+        
+                                    <form id="greenhouseForm" class="mt-4" style="display:none;">
+                                        <div id="greenhouseFields" class="mb-4"></div>
+        
+                                        <h5 class="mb-3">Add New Greenhouse</h5>
+                                        <div class="new-greenhouse row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <input type="text" id="newKey" placeholder="Key" class="form-control">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="text" id="newValue" placeholder="Name" class="form-control">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <button type="button" onclick="addNewGreenhouse()" class="btn btn-success">Add</button>
+                                            </div>
+                                        </div>
+        
+                                        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <script>
+                // Function to dynamically add greenhouse fields
+                function addNewGreenhouse() {
+                    var newKey = document.getElementById('newKey').value;
+                    var newValue = document.getElementById('newValue').value;
+                    
+                    if (newKey && newValue) {
+                        var greenhouseFields = document.getElementById('greenhouseFields');
+                        var entryDiv = document.createElement('div');
+                        entryDiv.className = 'greenhouse-entry';
+                        
+                        entryDiv.innerHTML = `
+                            <input type="text" value="${newKey}" readonly style="width: 40%;">
+                            <input type="text" value="${newValue}" style="width: 50%;">
+                            <button type="button" class="secondary" onclick="this.parentElement.remove()">Remove</button>
+                        `;
+                        
+                        greenhouseFields.appendChild(entryDiv);
+                        
+                        // Clear input fields
+                        document.getElementById('newKey').value = '';
+                        document.getElementById('newValue').value = '';
+                    }
+                }
+                
+                var clientSelect = document.getElementById('clientSelect');
+                var clientSelectForm = document.getElementById('clientSelectForm');
+                var greenhouseForm = document.getElementById('greenhouseForm');
+                var greenhouseFields = document.getElementById('greenhouseFields');
+
+                let currentClient = null;
+                let greenhouseData = {};
+
+                async function fetchClients() {
+                    var res = await fetch('/clients');
+                    var clients = await res.json();
+                    clients.forEach(client => {
+                        console.log(clients);
+                        console.log(client);
+                        var option = document.createElement('option');
+                        option.value = client;
+                        option.textContent = client;
+                        clientSelect.appendChild(option);
+                    });
+                }
+
+                clientSelectForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    currentClient = clientSelect.value;
+                    var res = await fetch(`/get-greenhouses?client_name=${currentClient}`);
+                    greenhouseData = await res.json();
+                    greenhouseForm.style.display = 'block';
+                    renderFields();
+                });
+
+                function renderFields() {
+                    greenhouseFields.innerHTML = '';
+
+                    var data = greenhouseData[0]; // access the object inside the array
+
+                    for (var key in data) {
+                        var input = document.createElement('input');
+                        input.name = key;
+                        input.value = data[key];
+                        input.placeholder = key;
+                        input.className = 'form-control';
+                        greenhouseFields.appendChild(document.createTextNode(`${key}: `));
+                        greenhouseFields.appendChild(input);
+                        greenhouseFields.appendChild(document.createElement('br'));
+                    }
+                }
+
+                function addNewGreenhouse() {
+                    var key = document.getElementById('newKey').value;
+                    var value = document.getElementById('newValue').value;
+
+                    if (key && value) {
+                        greenhouseData[0][key] = value; // update the object inside the array
+                        renderFields();
+                        document.getElementById('newKey').value = '';
+                        document.getElementById('newValue').value = '';
+                    }
+                }
+
+                greenhouseForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    var formData = new FormData(greenhouseForm);
+                    var updatedData = {};
+
+                    for (var [key, value] of formData.entries()) {
+                        updatedData[key] = value;
+                    }
+
+                    var res = await fetch('/update-greenhouses', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            client_name: currentClient,
+                            greenhouses: [updatedData]  // wrap it back into an array
+                        })
+                    });
+
+                    var result = await res.json();
+                    alert(result.message);
+                });
+
+                fetchClients();
+                
+                // Check for preselected client from row action
+                document.addEventListener('DOMContentLoaded', () => {
+                    const preselectedClient = localStorage.getItem('preselectedClient');
+                    if (preselectedClient) {
+                        // Wait a bit for client options to load
+                        setTimeout(() => {
+                            const option = Array.from(clientSelect.options).find(opt => opt.text === preselectedClient);
+                            if (option) {
+                                clientSelect.value = option.value;
+                                clientSelectForm.dispatchEvent(new Event('submit'));
+                                localStorage.removeItem('preselectedClient');
+                            }
+                        }, 500);
+                    }
+                });
+            </script>
+        """
+    
+    # This row action is no longer needed since the greenhouse manager is the default view
+    # But if you still need access to client-specific data from detail views:
     @row_action(
         name="make_published",
-        text="Mark as published",
+        text="Edit Greenhouses",
         confirmation="Edit Greenhouses of clients",
         icon_class="fas fa-check-circle",
         submit_btn_text="Yes, proceed",
         submit_btn_class="btn-success",
         action_btn_class="btn-info",
-        form="""
-        <style>
-    .modal-footer button[data-bs-dismiss="modal"] {
-        display: none !important;
-    }
-</style>
-
-                <!-- Greenhouse Manager Content -->
-<div id="manager-content" class="feature-content active card p-4">
-    <form id="clientSelectForm">
-        <div class="form-group mb-3">
-            <label for="clientSelect" class="form-label">Select Client:</label>
-            <div class="d-flex align-items-center">
-                <select id="clientSelect" name="client" class="form-select me-2">
-                    <!-- Options will be populated dynamically -->
-                </select>
-                <button type="submit" class="btn btn-primary">Load Greenhouses</button>
-            </div>
-        </div>
-    </form>
-
-    <form id="greenhouseForm" class="mt-4" style="display:none;">
-        <div id="greenhouseFields" class="mb-4"></div>
-
-        <h3 class="mb-3">Add New Greenhouse</h3>
-        <div class="new-greenhouse row g-3 mb-3">
-            <div class="col-md-4">
-                <input type="text" id="newKey" placeholder="Key" class="form-control">
-            </div>
-            <div class="col-md-4">
-                <input type="text" id="newValue" placeholder="Name" class="form-control">
-            </div>
-            <div class="col-md-4">
-                <button type="button" onclick="addNewGreenhouse()" class="btn btn-success">Add</button>
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
-        
-    </form>
-    <button class="btn btn-primary mt-3" onclick="window.location.reload()">Close</button>
-</div>
-        <script>
-        // Function to dynamically add greenhouse fields (placeholder for your implementation)
-        function addNewGreenhouse() {
-            var newKey = document.getElementById('newKey').value;
-            var newValue = document.getElementById('newValue').value;
-            
-            if (newKey && newValue) {
-                var greenhouseFields = document.getElementById('greenhouseFields');
-                var entryDiv = document.createElement('div');
-                entryDiv.className = 'greenhouse-entry';
-                
-                entryDiv.innerHTML = `
-                    <input type="text" value="${newKey}" readonly style="width: 40%;">
-                    <input type="text" value="${newValue}" style="width: 50%;">
-                    <button type="button" class="secondary" onclick="this.parentElement.remove()">Remove</button>
-                `;
-                
-                greenhouseFields.appendChild(entryDiv);
-                
-                // Clear input fields
-                document.getElementById('newKey').value = '';
-                document.getElementById('newValue').value = '';
-            }
-        }
-        
-        // This is where your original script would go
-        // ...some script...
-        var clientSelect = document.getElementById('clientSelect');
-        var clientSelectForm = document.getElementById('clientSelectForm');
-        var greenhouseForm = document.getElementById('greenhouseForm');
-        var greenhouseFields = document.getElementById('greenhouseFields');
-
-        let currentClient = null;
-        let greenhouseData = {};
-
-        async function fetchClients() {
-            var res = await fetch('/clients');
-            var clients = await res.json();
-            clients.forEach(client => {
-                console.log(clients);
-                console.log(client);
-                var option = document.createElement('option');
-                option.value = client;
-                option.textContent = client;
-                clientSelect.appendChild(option);
-            });
-        }
-
-        clientSelectForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            currentClient = clientSelect.value;
-            var res = await fetch(`/get-greenhouses?client_name=${currentClient}`);
-            greenhouseData = await res.json();
-            greenhouseForm.style.display = 'block';
-            renderFields();
-        });
-
-        function renderFields() {
-    greenhouseFields.innerHTML = '';
-
-    var data = greenhouseData[0]; // access the object inside the array
-
-    for (var key in data) {
-        var input = document.createElement('input');
-        input.name = key;
-        input.value = data[key];
-        input.placeholder = key;
-        input.className = 'form-control';
-        greenhouseFields.appendChild(document.createTextNode(`${key}: `));
-        greenhouseFields.appendChild(input);
-        greenhouseFields.appendChild(document.createElement('br'));
-    }
-}
-
-
-function addNewGreenhouse() {
-    var key = document.getElementById('newKey').value;
-    var value = document.getElementById('newValue').value;
-
-    if (key && value) {
-        greenhouseData[0][key] = value; // update the object inside the array
-        renderFields();
-        document.getElementById('newKey').value = '';
-        document.getElementById('newValue').value = '';
-    }
-}
-
-
-greenhouseForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    var formData = new FormData(greenhouseForm);
-    var updatedData = {};
-
-    for (var [key, value] of formData.entries()) {
-        updatedData[key] = value;
-    }
-
-    var res = await fetch('/update-greenhouses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            client_name: currentClient,
-            greenhouses: [updatedData]  // wrap it back into an array
-        })
-    });
-
-    var result = await res.json();
-    alert(result.message);
-});
-
-
-        fetchClients();
-    </script>
-        """,
     )
     async def make_published_row_action(self, request: Request, pk: Any) -> str:
-        # Write your logic here
-
-        data: FormData = await request.form()
-        user_input = data.get("example-text-input")
-
-        if ...:
-            # Display meaningfully error
-            raise ActionFailed("Sorry, We can't proceed this action now.")
-        # Display successfully message
-        return "The article was successfully marked as published"
-
+        # You could fetch client-specific data here if needed
+        client_name = self.get_object_display_name(request, pk)
+        return HTMLResponse(
+            f"""
+            <script>
+                localStorage.setItem('preselectedClient', '{client_name}');
+                window.location.href = "{request.url.path.rsplit('/', 2)[0]}";
+            </script>
+            """
+        )
     
 
 # class SymptomThresholdView(ModelView):
