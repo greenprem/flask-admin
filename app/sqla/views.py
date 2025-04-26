@@ -255,7 +255,7 @@ class EnvDataView(ModelView):
 class SensorRangeView(ModelView):
     page_size = 10
     fields = [
-        "id", "client", "greenhouse", "site",
+        "id", "client", "greenhouse", "site", "location",
         "temp_optimal", "humidity_risky", "ec_risky", "ph_risky"
     ]
     exclude_fields_from_edit = ["client_name", "site", "greenhouse"]

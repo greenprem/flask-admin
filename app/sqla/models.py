@@ -86,6 +86,7 @@ class SensorRange(Base):
     client = Column(String(50))
     greenhouse = Column(String(50))
     site = Column(String(50))
+    location = Column(String(50))
     temp_optimal = Column(String(50))
     humidity_risky = Column(String(50))
     ec_risky = Column(String(50))
