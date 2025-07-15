@@ -234,13 +234,14 @@ def get_greenhouses(request: Request):
         if not result:
             return JSONResponse({"error": "Client not found"}, status_code=404)
         client = result[0]
-        return JSONResponse(client.greenhouse_name)
+        return JSONResponse({"site":client.site_name,"greenhouse":client.greenhouse_name})
 
 # API: Update greenhouses
 async def update_greenhouses(request: Request):
     data = await request.json()
     client_name = data.get("client_name")
     greenhouses = data.get("greenhouses")
+    sites = data.get("sites")
 
     if not client_name or not isinstance(greenhouses, list):
         print(client_name, greenhouses)
@@ -255,6 +256,7 @@ async def update_greenhouses(request: Request):
 
         client = result[0]
         client.greenhouse_name = greenhouses
+        client.site_name = sites
         db.commit()
 
     return JSONResponse({"message": "Greenhouses updated successfully"})

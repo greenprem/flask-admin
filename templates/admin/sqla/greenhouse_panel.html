@@ -27,74 +27,107 @@
     </form>
 
     <script>
-        const clientSelect = document.getElementById('clientSelect');
-        const clientSelectForm = document.getElementById('clientSelectForm');
-        const greenhouseForm = document.getElementById('greenhouseForm');
-        const greenhouseFields = document.getElementById('greenhouseFields');
+const clientSelect = document.getElementById('clientSelect');
+const clientSelectForm = document.getElementById('clientSelectForm');
+const greenhouseForm = document.getElementById('greenhouseForm');
+const greenhouseFields = document.getElementById('greenhouseFields');
 
-        let currentClient = null;
-        let greenhouseData = {};
+let currentClient = null;
+let greenhouseData = {};
 
-        async function fetchClients() {
-            const res = await fetch('/clients');
-            const clients = await res.json();
-            clients.forEach(client => {
-                console.log(clients);
-                console.log(client);
-                const option = document.createElement('option');
-                option.value = client;
-                option.textContent = client;
-                clientSelect.appendChild(option);
-            });
-        }
-
-        clientSelectForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            currentClient = clientSelect.value;
-            const res = await fetch(`/get-greenhouses?client_name=${currentClient}`);
-            greenhouseData = await res.json();
-            greenhouseForm.style.display = 'block';
-            renderFields();
-        });
-
-        function renderFields() {
-    greenhouseFields.innerHTML = '';
-
-    const data = greenhouseData[0]; // access the object inside the array
-
-    for (const key in data) {
-        const input = document.createElement('input');
-        input.name = key;
-        input.value = data[key];
-        input.placeholder = key;
-        greenhouseFields.appendChild(document.createTextNode(`${key}: `));
-        greenhouseFields.appendChild(input);
-        greenhouseFields.appendChild(document.createElement('br'));
-    }
+async function fetchClients() {
+    const res = await fetch('/clients');
+    const clients = await res.json();
+    clients.forEach(client => {
+        const option = document.createElement('option');
+        option.value = client;
+        option.textContent = client;
+        clientSelect.appendChild(option);
+    });
 }
 
+clientSelectForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    currentClient = clientSelect.value;
+    const res = await fetch(`/get-greenhouses?client_name=${currentClient}`);
+    greenhouseData = await res.json();
+    greenhouseForm.style.display = 'block';
+    renderFields();
+});
+
+function renderFields() {
+    greenhouseFields.innerHTML = '';
+
+    const greenhouseArray = greenhouseData["greenhouse"];
+    const siteArray = greenhouseData["site"];
+
+    siteArray.forEach((siteName, index) => {
+        const siteWrapper = document.createElement('div');
+        siteWrapper.className = 'site-block';
+        siteWrapper.dataset.siteIndex = index;
+
+        const siteHeader = document.createElement('h3');
+        siteHeader.textContent = `Site: ${siteName}`;
+        siteWrapper.appendChild(siteHeader);
+
+        const greenhouses = greenhouseArray[index];
+        for (const key in greenhouses) {
+            const label = document.createElement('label');
+            label.textContent = `${key}: `;
+
+            const input = document.createElement('input');
+            input.name = `${index}__${key}`; // include index in name
+            input.value = greenhouses[key];
+            input.placeholder = key;
+
+            siteWrapper.appendChild(label);
+            siteWrapper.appendChild(input);
+            siteWrapper.appendChild(document.createElement('br'));
+        }
+
+        greenhouseFields.appendChild(siteWrapper);
+        greenhouseFields.appendChild(document.createElement('hr'));
+    });
+
+    renderSiteSelector();
+}
+
+function renderSiteSelector() {
+    const siteArray = greenhouseData["site"];
+    const container = document.createElement('div');
+    container.innerHTML = `
+        <label>Add to Site:
+            <select id="siteSelectForNew">
+                ${siteArray.map((s, i) => `<option value="${i}">${s}</option>`).join('')}
+            </select>
+        </label>
+    `;
+    greenhouseFields.appendChild(container);
+}
 
 function addNewGreenhouse() {
-    const key = document.getElementById('newKey').value;
-    const value = document.getElementById('newValue').value;
+    const key = document.getElementById('newKey').value.trim();
+    const value = document.getElementById('newValue').value.trim();
+    const siteIndex = document.getElementById('siteSelectForNew').value;
 
     if (key && value) {
-        greenhouseData[0][key] = value; // update the object inside the array
-        renderFields();
+        greenhouseData.greenhouse[siteIndex][key] = value;
+        renderFields(); // re-render to reflect
         document.getElementById('newKey').value = '';
         document.getElementById('newValue').value = '';
     }
 }
 
-
 greenhouseForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const formData = new FormData(greenhouseForm);
-    const updatedData = {};
+    const greenhouseArray = greenhouseData.greenhouse.map(() => ({}));
 
-    for (const [key, value] of formData.entries()) {
-        updatedData[key] = value;
+    // Rebuild greenhouseArray with updated values
+    for (const [name, value] of formData.entries()) {
+        const [index, key] = name.split('__');
+        greenhouseArray[+index][key] = value;
     }
 
     const res = await fetch('/update-greenhouses', {
@@ -102,7 +135,8 @@ greenhouseForm.addEventListener('submit', async (e) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             client_name: currentClient,
-            greenhouses: [updatedData]  // wrap it back into an array
+            sites: greenhouseData.site,
+            greenhouses: greenhouseArray
         })
     });
 
@@ -110,8 +144,8 @@ greenhouseForm.addEventListener('submit', async (e) => {
     alert(result.message);
 });
 
+fetchClients();
+</script>
 
-        fetchClients();
-    </script>
 </body>
 </html>
