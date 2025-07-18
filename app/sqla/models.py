@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, Date, Time, Float, BigInteger
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, Date, Time, Float, BigInteger, Text
 from sqlalchemy.dialects.postgresql import ARRAY, JSON as PostgresJSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.mutable import MutableDict
@@ -50,6 +50,18 @@ class Greenhouse(Base):
     id = Column(Integer, primary_key=True)
     farm_id = Column(Integer, ForeignKey('farm.id'), nullable=False)
     name = Column(String(50), nullable=False)
+
+class Activities(Base):
+    __tablename__ = 'activities'
+
+    id = Column(Integer, primary_key=True)
+    client_name = Column(String(50), nullable=False)
+    site = Column(String(50), nullable=False)
+    greenhouse = Column(String(50), nullable=False)
+    activity_type = Column(String(50), nullable=False)  # e.g., 'planting', 'harvesting', etc.
+    date = Column(Date, nullable=False)
+    time = Column(Time, nullable=False)
+    description = Column(Text, nullable=True)  # Optional description of the activity
 
 
 class EnvData(Base):

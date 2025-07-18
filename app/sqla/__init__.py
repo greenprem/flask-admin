@@ -15,9 +15,9 @@ from starlette_admin.contrib.sqla import Admin, ModelView
 
 from app.config import config
 from app.sqla.auth import MyAuthProvider
-from app.sqla.models import Client, CycleInfo, EnvData, SensorRange, DiseaseData, BucketValues, PlantWeek, Observation, Grid, GridAnalysis
+from app.sqla.models import Client, CycleInfo, EnvData, SensorRange, DiseaseData, BucketValues, PlantWeek, Observation, Grid, GridAnalysis, Activities
 #from app.sqla.views import ClientView, SymptomThresholdView, CycleInfoView, EnvDataView, FeedbackView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, FeedBackGridImagesView, WeeksView
-from app.sqla.views import ClientView, CycleInfoView, EnvDataView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, HomeView
+from app.sqla.views import ClientView, CycleInfoView, EnvDataView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, HomeView,ActivitiesView
 __all__ = ["engine", "admin"]
 
 # Save avatar to local Storage
@@ -58,5 +58,6 @@ admin.add_view(PlantWeekView(PlantWeek, icon="fa fa-id-badge", label="Plant Week
 admin.add_view(ObservationView(Observation, icon="fa fa-id-badge", label="Observation"))
 admin.add_view(GridView(Grid, icon="fa fa-id-badge", label="Grid"))
 admin.add_view(GridAnalysisView(GridAnalysis, icon="fa fa-id-badge", label="Grid Analysis"))
+admin.add_view(ActivitiesView(Activities, icon="fa fa-id-badge", label="Activities"))
 #admin.add_view(ModelView(FeedBackGridImages, icon="fa fa-id-badge", label="Feedback Grid Images"))
 #admin.add_view(ModelView(Weeks, icon="fa fa-id-badge", label="Weeks"))

@@ -234,6 +234,18 @@ class CycleInfoView(ModelView):
     exclude_fields_from_edit = ["client_name", "site", "greenhouse"]
 
 
+class ActivitiesView(ModelView):
+    page_size = 10
+    fields = [
+        "id", "client_name", "site", "greenhouse",
+        "activity_type", "date", "time", "description"
+    ]
+
+
+    exclude_fields_from_edit = [
+        "client_name", "site", "greenhouse"
+    ]  # Optional: adjust according to your use case
+
 
 class EnvDataView(ModelView):
     page_size = 10
