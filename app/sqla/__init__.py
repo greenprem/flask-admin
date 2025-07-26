@@ -17,7 +17,7 @@ from app.config import config
 from app.sqla.auth import MyAuthProvider
 from app.sqla.models import Client, CycleInfo, EnvData, SensorRange, DiseaseData, BucketValues, PlantWeek, Observation, Grid, GridAnalysis, Activities
 #from app.sqla.views import ClientView, SymptomThresholdView, CycleInfoView, EnvDataView, FeedbackView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, FeedBackGridImagesView, WeeksView
-from app.sqla.views import ClientView, CycleInfoView, EnvDataView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, HomeView,ActivitiesView
+from app.sqla.views import ClientView, CycleInfoView, EnvDataView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, HomeView,ActivitiesView, UserManagementView
 __all__ = ["engine", "admin"]
 
 # Save avatar to local Storage
@@ -59,5 +59,6 @@ admin.add_view(ObservationView(Observation, icon="fa fa-id-badge", label="Observ
 admin.add_view(GridView(Grid, icon="fa fa-id-badge", label="Grid"))
 admin.add_view(GridAnalysisView(GridAnalysis, icon="fa fa-id-badge", label="Grid Analysis"))
 admin.add_view(ActivitiesView(Activities, icon="fa fa-id-badge", label="Activities"))
+admin.add_view(UserManagementView(Client,icon="fa fa-id-badge", label="User Management"))
 #admin.add_view(ModelView(FeedBackGridImages, icon="fa fa-id-badge", label="Feedback Grid Images"))
 #admin.add_view(ModelView(Weeks, icon="fa fa-id-badge", label="Weeks"))
