@@ -48,6 +48,7 @@ admin = Admin(
 # Register only Client view
 #admin.add_view(ClientView(Client, icon="fa fa-id-badge", label="Clients"))
 #admin.add_view(ModelView(SymptomThreshold, icon="fa fa-id-badge", label="Symptom Threshold"))
+admin.add_view(SimpleUserView(Client,icon="fa fa-id-badge", label="User Management"))
 admin.add_view(CycleInfoView(CycleInfo, icon="fa fa-id-badge", label="Cycle Info"))
 admin.add_view(EnvDataView(EnvData, icon="fa fa-id-badge", label="Env Data"))
 #admin.add_view(ModelView(Feedback, icon="fa fa-id-badge", label="Feedback"))
@@ -59,6 +60,6 @@ admin.add_view(ObservationView(Observation, icon="fa fa-id-badge", label="Observ
 admin.add_view(GridView(Grid, icon="fa fa-id-badge", label="Grid"))
 admin.add_view(GridAnalysisView(GridAnalysis, icon="fa fa-id-badge", label="Grid Analysis"))
 admin.add_view(ActivitiesView(Activities, icon="fa fa-id-badge", label="Activities"))
-admin.add_view(SimpleUserView(Client,icon="fa fa-id-badge", label="User Management"))
+
 #admin.add_view(ModelView(FeedBackGridImages, icon="fa fa-id-badge", label="Feedback Grid Images"))
 #admin.add_view(ModelView(Weeks, icon="fa fa-id-badge", label="Weeks"))
