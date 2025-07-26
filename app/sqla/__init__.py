@@ -59,6 +59,6 @@ admin.add_view(ObservationView(Observation, icon="fa fa-id-badge", label="Observ
 admin.add_view(GridView(Grid, icon="fa fa-id-badge", label="Grid"))
 admin.add_view(GridAnalysisView(GridAnalysis, icon="fa fa-id-badge", label="Grid Analysis"))
 admin.add_view(ActivitiesView(Activities, icon="fa fa-id-badge", label="Activities"))
-admin.add_view(UserManagementView(Client,icon="fa fa-id-badge", label="User Management"))
+admin.add_view(SimpleUserView(Client,icon="fa fa-id-badge", label="User Management"))
 #admin.add_view(ModelView(FeedBackGridImages, icon="fa fa-id-badge", label="Feedback Grid Images"))
 #admin.add_view(ModelView(Weeks, icon="fa fa-id-badge", label="Weeks"))
