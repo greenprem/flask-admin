@@ -525,14 +525,17 @@ class UserManagementView(ModelView):
         query = super().get_list_query()
         return query
     
-    async def serialize_field_value(self, value: Any, field: str) -> Any:
+    async def serialize_field_value(self, value: Any, field: Any, action: str, request: Request) -> Any:
         """
         Override to handle password display (mask it for security)
         """
-        if field == "password":
+        if hasattr(field, 'name') and field.name == "password":
             # Mask password in list view for security
             return "*" * min(len(str(value)), 8) if value else ""
-        return await super().serialize_field_value(value, field)
+        elif isinstance(field, str) and field == "password":
+            # Handle case where field is passed as string
+            return "*" * min(len(str(value)), 8) if value else ""
+        return await super().serialize_field_value(value, field, action, request)
     
     @row_action(
         name="reset_password",
