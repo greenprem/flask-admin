@@ -683,8 +683,8 @@ class SimpleUserView(ModelView):
             data["client_name"] = data["username"]
         return await super().edit(request, pk, data)
     
-    async def serialize_field_value(self, value: Any, field: str) -> Any:
+    async def serialize_field_value(self, value: Any, field: Any, action: str, request: Request) -> Any:
         """Mask passwords in list view"""
         if field == "password":
             return "*" * min(len(str(value)), 6) if value else ""
-        return await super().serialize_field_value(value, field)
+        return await super().serialize_field_value(value, field, action, request)
