@@ -17,7 +17,7 @@ from app.config import config
 from app.sqla.auth import MyAuthProvider
 from app.sqla.models import Client, CycleInfo, EnvData, SensorRange, DiseaseData, BucketValues, PlantWeek, Observation, Grid, GridAnalysis, Activities
 #from app.sqla.views import ClientView, SymptomThresholdView, CycleInfoView, EnvDataView, FeedbackView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, FeedBackGridImagesView, WeeksView
-from app.sqla.views import ClientView, CycleInfoView, EnvDataView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, HomeView,ActivitiesView, UserManagementView
+from app.sqla.views import ClientView, CycleInfoView, EnvDataView, SensorRangeView, DiseaseDataView, BucketValuesView, PlantWeekView, ObservationView, GridView, GridAnalysisView, HomeView,ActivitiesView, SimpleUserView
 __all__ = ["engine", "admin"]
 
 # Save avatar to local Storage
