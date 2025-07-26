@@ -421,270 +421,270 @@ class HomeView(CustomView):
             "home.html", {"request": request}
         )
 
-class UserManagementView(ModelView):
-    """
-    View for managing user credentials (username and password only).
-    Client name is automatically set to match the username.
-    """
-    
-    # Basic view configuration
-    row_actions = ["view", "edit", "delete"]
-    row_actions_display_type = RowActionsDisplayType.ICON_LIST
-    page_size = 15
-    
-    # Only show username and password fields
-    fields = ["id", "username", "password"]
-    
-    # Make fields searchable and sortable
-    searchable_fields = ["username"]
-    sortable_fields = ["id", "username"]
-    
-    # Don't allow editing of ID (auto-generated)
-    exclude_fields_from_edit = ["id"]
-    exclude_fields_from_create = ["id"]
-    
-    # Labels for better UX
-    labels = {
-        "username": "Username",
-        "password": "Password"
-    }
-    
-    async def create(self, request: Request, data: Dict[str, Any]) -> Any:
-        """
-        Override create method to automatically set client_name to username
-        and provide default values for required JSON fields
-        """
-        # Set client_name to match username
-        data["client_name"] = data.get("username", "")
-        
-        # Set default empty JSON arrays for required fields
-        if "site_name" not in data:
-            data["site_name"] = []
-        if "greenhouse_name" not in data:
-            data["greenhouse_name"] = []
-            
-        # Validate required fields
-        if not data.get("username"):
-            raise FormValidationError([
-                {"loc": ["username"], "msg": "Username is required", "type": "value_error"}
-            ])
-        if not data.get("password"):
-            raise FormValidationError([
-                {"loc": ["password"], "msg": "Password is required", "type": "value_error"}
-            ])
-            
-        # Check if username already exists
-        async with self.session_maker() as session:
-            existing_user = await session.execute(
-                select(self.model).where(self.model.username == data["username"])
-            )
-            if existing_user.scalar_one_or_none():
-                raise FormValidationError([
-                    {"loc": ["username"], "msg": "Username already exists", "type": "value_error"}
-                ])
-        
-        return await super().create(request, data)
-    
-    async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
-        """
-        Override edit method to automatically update client_name when username changes
-        """
-        # Set client_name to match username
-        if "username" in data:
-            data["client_name"] = data["username"]
-            
-            # Check if new username already exists (excluding current record)
-            async with self.session_maker() as session:
-                existing_user = await session.execute(
-                    select(self.model).where(
-                        self.model.username == data["username"],
-                        self.model.id != pk
-                    )
-                )
-                if existing_user.scalar_one_or_none():
-                    raise FormValidationError([
-                        {"loc": ["username"], "msg": "Username already exists", "type": "value_error"}
-                    ])
-        
-        # Validate required fields
-        if not data.get("username"):
-            raise FormValidationError([
-                {"loc": ["username"], "msg": "Username is required", "type": "value_error"}
-            ])
-        if not data.get("password"):
-            raise FormValidationError([
-                {"loc": ["password"], "msg": "Password is required", "type": "value_error"}
-            ])
-            
-        return await super().edit(request, pk, data)
-    
-    def get_list_query(self):
-        """
-        Override to only show relevant columns in list view
-        """
-        query = super().get_list_query()
-        return query
-    
-    async def serialize_field_value(self, value: Any, field: Any, action: str, request: Request) -> Any:
-        """
-        Override to handle password display (mask it for security)
-        """
-        if hasattr(field, 'name') and field.name == "password":
-            # Mask password in list view for security
-            return "*" * min(len(str(value)), 8) if value else ""
-        elif isinstance(field, str) and field == "password":
-            # Handle case where field is passed as string
-            return "*" * min(len(str(value)), 8) if value else ""
-        return await super().serialize_field_value(value, field, action, request)
-    
-    @row_action(
-        name="reset_password",
-        text="Reset Password",
-        confirmation="Are you sure you want to reset this user's password?",
-        icon_class="fas fa-key",
-        submit_btn_text="Reset Password",
-        submit_btn_class="btn-warning",
-        action_btn_class="btn-warning",
-        form="""
-        <div class="mb-3">
-            <label for="new_password" class="form-label">New Password:</label>
-            <input type="password" id="new_password" name="new_password" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label for="confirm_password" class="form-label">Confirm Password:</label>
-            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
-        </div>
-        <script>
-            document.querySelector('form').addEventListener('submit', function(e) {
-                var newPassword = document.getElementById('new_password').value;
-                var confirmPassword = document.getElementById('confirm_password').value;
-                
-                if (newPassword !== confirmPassword) {
-                    e.preventDefault();
-                    alert('Passwords do not match!');
-                    return false;
-                }
-                
-                if (newPassword.length < 4) {
-                    e.preventDefault();
-                    alert('Password must be at least 4 characters long!');
-                    return false;
-                }
-            });
-        </script>
-        """,
-    )
-    async def reset_password_action(self, request: Request, pk: Any) -> str:
-        """
-        Action to reset a user's password
-        """
-        try:
-            from starlette.datastructures import FormData
-            data: FormData = await request.form()
-            new_password = data.get("new_password")
-            confirm_password = data.get("confirm_password")
-            
-            # Validate passwords match
-            if new_password != confirm_password:
-                raise ActionFailed("Passwords do not match!")
-            
-            if not new_password or len(new_password) < 4:
-                raise ActionFailed("Password must be at least 4 characters long!")
-            
-            # Update password in database
-            async with self.session_maker() as session:
-                user = await session.get(self.model, pk)
-                if not user:
-                    raise ActionFailed("User not found!")
-                
-                user.password = new_password
-                await session.commit()
-            
-            return f"Password successfully reset for user: {user.username}"
-            
-        except Exception as e:
-            raise ActionFailed(f"Failed to reset password: {str(e)}")
-    
-    @action(
-        name="bulk_password_reset",
-        text="Bulk Password Reset",
-        confirmation="Reset passwords for selected users?",
-        icon_class="fas fa-users-cog",
-        submit_btn_text="Reset All",
-        submit_btn_class="btn-danger",
-        form="""
-        <div class="mb-3">
-            <label for="default_password" class="form-label">Default Password:</label>
-            <input type="password" id="default_password" name="default_password" class="form-control" 
-                   placeholder="Enter default password for all selected users" required>
-        </div>
-        <div class="alert alert-warning">
-            <strong>Warning:</strong> This will reset passwords for ALL selected users to the same default password.
-            Users should change their passwords after login.
-        </div>
-        """,
-    )
-    async def bulk_password_reset_action(self, request: Request, pks: list[Any]) -> str:
-        """
-        Bulk action to reset multiple users' passwords
-        """
-        try:
-            from starlette.datastructures import FormData
-            data: FormData = await request.form()
-            default_password = data.get("default_password")
-            
-            if not default_password or len(default_password) < 4:
-                raise ActionFailed("Default password must be at least 4 characters long!")
-            
-            updated_count = 0
-            async with self.session_maker() as session:
-                for pk in pks:
-                    user = await session.get(self.model, pk)
-                    if user:
-                        user.password = default_password
-                        updated_count += 1
-                
-                await session.commit()
-            
-            return f"Successfully reset passwords for {updated_count} users"
-            
-        except Exception as e:
-            raise ActionFailed(f"Failed to reset passwords: {str(e)}")
-
-
-# Alternative simplified view if you want even less features
-# class SimpleUserView(ModelView):
+# class UserManagementView(ModelView):
 #     """
-#     Simplified user management view with minimal features
+#     View for managing user credentials (username and password only).
+#     Client name is automatically set to match the username.
 #     """
     
-#     row_actions = ["edit", "delete"]
-#     page_size = 20
+#     # Basic view configuration
+#     row_actions = ["view", "edit", "delete"]
+#     row_actions_display_type = RowActionsDisplayType.ICON_LIST
+#     page_size = 15
     
-#     fields = ["username", "password"]
+#     # Only show username and password fields
+#     fields = ["id", "username", "password"]
+    
+#     # Make fields searchable and sortable
 #     searchable_fields = ["username"]
-#     sortable_fields = ["username"]
+#     sortable_fields = ["id", "username"]
     
+#     # Don't allow editing of ID (auto-generated)
+#     exclude_fields_from_edit = ["id"]
+#     exclude_fields_from_create = ["id"]
+    
+#     # Labels for better UX
 #     labels = {
 #         "username": "Username",
 #         "password": "Password"
 #     }
     
 #     async def create(self, request: Request, data: Dict[str, Any]) -> Any:
-#         """Set client_name to username and provide defaults"""
+#         """
+#         Override create method to automatically set client_name to username
+#         and provide default values for required JSON fields
+#         """
+#         # Set client_name to match username
 #         data["client_name"] = data.get("username", "")
-#         data["site_name"] = []
-#         data["greenhouse_name"] = []
+        
+#         # Set default empty JSON arrays for required fields
+#         if "site_name" not in data:
+#             data["site_name"] = []
+#         if "greenhouse_name" not in data:
+#             data["greenhouse_name"] = []
+            
+#         # Validate required fields
+#         if not data.get("username"):
+#             raise FormValidationError([
+#                 {"loc": ["username"], "msg": "Username is required", "type": "value_error"}
+#             ])
+#         if not data.get("password"):
+#             raise FormValidationError([
+#                 {"loc": ["password"], "msg": "Password is required", "type": "value_error"}
+#             ])
+            
+#         # Check if username already exists
+#         async with self.session_maker() as session:
+#             existing_user = await session.execute(
+#                 select(self.model).where(self.model.username == data["username"])
+#             )
+#             if existing_user.scalar_one_or_none():
+#                 raise FormValidationError([
+#                     {"loc": ["username"], "msg": "Username already exists", "type": "value_error"}
+#                 ])
+        
 #         return await super().create(request, data)
     
 #     async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
-#         """Update client_name when username changes"""
+#         """
+#         Override edit method to automatically update client_name when username changes
+#         """
+#         # Set client_name to match username
 #         if "username" in data:
 #             data["client_name"] = data["username"]
+            
+#             # Check if new username already exists (excluding current record)
+#             async with self.session_maker() as session:
+#                 existing_user = await session.execute(
+#                     select(self.model).where(
+#                         self.model.username == data["username"],
+#                         self.model.id != pk
+#                     )
+#                 )
+#                 if existing_user.scalar_one_or_none():
+#                     raise FormValidationError([
+#                         {"loc": ["username"], "msg": "Username already exists", "type": "value_error"}
+#                     ])
+        
+#         # Validate required fields
+#         if not data.get("username"):
+#             raise FormValidationError([
+#                 {"loc": ["username"], "msg": "Username is required", "type": "value_error"}
+#             ])
+#         if not data.get("password"):
+#             raise FormValidationError([
+#                 {"loc": ["password"], "msg": "Password is required", "type": "value_error"}
+#             ])
+            
 #         return await super().edit(request, pk, data)
     
-#     async def serialize_field_value(self, value: Any, field: str) -> Any:
-#         """Mask passwords in list view"""
-#         if field == "password":
-#             return "*" * min(len(str(value)), 6) if value else ""
-#         return await super().serialize_field_value(value, field)
+#     def get_list_query(self):
+#         """
+#         Override to only show relevant columns in list view
+#         """
+#         query = super().get_list_query()
+#         return query
+    
+#     async def serialize_field_value(self, value: Any, field: Any, action: str, request: Request) -> Any:
+#         """
+#         Override to handle password display (mask it for security)
+#         """
+#         if hasattr(field, 'name') and field.name == "password":
+#             # Mask password in list view for security
+#             return "*" * min(len(str(value)), 8) if value else ""
+#         elif isinstance(field, str) and field == "password":
+#             # Handle case where field is passed as string
+#             return "*" * min(len(str(value)), 8) if value else ""
+#         return await super().serialize_field_value(value, field, action, request)
+    
+#     @row_action(
+#         name="reset_password",
+#         text="Reset Password",
+#         confirmation="Are you sure you want to reset this user's password?",
+#         icon_class="fas fa-key",
+#         submit_btn_text="Reset Password",
+#         submit_btn_class="btn-warning",
+#         action_btn_class="btn-warning",
+#         form="""
+#         <div class="mb-3">
+#             <label for="new_password" class="form-label">New Password:</label>
+#             <input type="password" id="new_password" name="new_password" class="form-control" required>
+#         </div>
+#         <div class="mb-3">
+#             <label for="confirm_password" class="form-label">Confirm Password:</label>
+#             <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+#         </div>
+#         <script>
+#             document.querySelector('form').addEventListener('submit', function(e) {
+#                 var newPassword = document.getElementById('new_password').value;
+#                 var confirmPassword = document.getElementById('confirm_password').value;
+                
+#                 if (newPassword !== confirmPassword) {
+#                     e.preventDefault();
+#                     alert('Passwords do not match!');
+#                     return false;
+#                 }
+                
+#                 if (newPassword.length < 4) {
+#                     e.preventDefault();
+#                     alert('Password must be at least 4 characters long!');
+#                     return false;
+#                 }
+#             });
+#         </script>
+#         """,
+#     )
+#     async def reset_password_action(self, request: Request, pk: Any) -> str:
+#         """
+#         Action to reset a user's password
+#         """
+#         try:
+#             from starlette.datastructures import FormData
+#             data: FormData = await request.form()
+#             new_password = data.get("new_password")
+#             confirm_password = data.get("confirm_password")
+            
+#             # Validate passwords match
+#             if new_password != confirm_password:
+#                 raise ActionFailed("Passwords do not match!")
+            
+#             if not new_password or len(new_password) < 4:
+#                 raise ActionFailed("Password must be at least 4 characters long!")
+            
+#             # Update password in database
+#             async with self.session_maker() as session:
+#                 user = await session.get(self.model, pk)
+#                 if not user:
+#                     raise ActionFailed("User not found!")
+                
+#                 user.password = new_password
+#                 await session.commit()
+            
+#             return f"Password successfully reset for user: {user.username}"
+            
+#         except Exception as e:
+#             raise ActionFailed(f"Failed to reset password: {str(e)}")
+    
+#     @action(
+#         name="bulk_password_reset",
+#         text="Bulk Password Reset",
+#         confirmation="Reset passwords for selected users?",
+#         icon_class="fas fa-users-cog",
+#         submit_btn_text="Reset All",
+#         submit_btn_class="btn-danger",
+#         form="""
+#         <div class="mb-3">
+#             <label for="default_password" class="form-label">Default Password:</label>
+#             <input type="password" id="default_password" name="default_password" class="form-control" 
+#                    placeholder="Enter default password for all selected users" required>
+#         </div>
+#         <div class="alert alert-warning">
+#             <strong>Warning:</strong> This will reset passwords for ALL selected users to the same default password.
+#             Users should change their passwords after login.
+#         </div>
+#         """,
+#     )
+#     async def bulk_password_reset_action(self, request: Request, pks: list[Any]) -> str:
+#         """
+#         Bulk action to reset multiple users' passwords
+#         """
+#         try:
+#             from starlette.datastructures import FormData
+#             data: FormData = await request.form()
+#             default_password = data.get("default_password")
+            
+#             if not default_password or len(default_password) < 4:
+#                 raise ActionFailed("Default password must be at least 4 characters long!")
+            
+#             updated_count = 0
+#             async with self.session_maker() as session:
+#                 for pk in pks:
+#                     user = await session.get(self.model, pk)
+#                     if user:
+#                         user.password = default_password
+#                         updated_count += 1
+                
+#                 await session.commit()
+            
+#             return f"Successfully reset passwords for {updated_count} users"
+            
+#         except Exception as e:
+#             raise ActionFailed(f"Failed to reset passwords: {str(e)}")
+
+
+# Alternative simplified view if you want even less features
+class SimpleUserView(ModelView):
+    """
+    Simplified user management view with minimal features
+    """
+    
+    row_actions = ["edit", "delete"]
+    page_size = 20
+    
+    fields = ["username", "password"]
+    searchable_fields = ["username"]
+    sortable_fields = ["username"]
+    
+    labels = {
+        "username": "Username",
+        "password": "Password"
+    }
+    
+    async def create(self, request: Request, data: Dict[str, Any]) -> Any:
+        """Set client_name to username and provide defaults"""
+        data["client_name"] = data.get("username", "")
+        data["site_name"] = []
+        data["greenhouse_name"] = []
+        return await super().create(request, data)
+    
+    async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
+        """Update client_name when username changes"""
+        if "username" in data:
+            data["client_name"] = data["username"]
+        return await super().edit(request, pk, data)
+    
+    async def serialize_field_value(self, value: Any, field: str) -> Any:
+        """Mask passwords in list view"""
+        if field == "password":
+            return "*" * min(len(str(value)), 6) if value else ""
+        return await super().serialize_field_value(value, field)
