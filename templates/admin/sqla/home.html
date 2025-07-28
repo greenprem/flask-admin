@@ -1,55 +1,72 @@
 {% extends "layout.html" %}
 {% block header %}
 <h1>Greenhouse Manager</h1>
+<div id="manager-content" class="feature-content active card p-4">
+<form id="clientSelectForm">
+<div class="form-group mb-3">
+<label for="clientSelect" class="form-label">Select Client:</label>
+<div class="d-flex align-items-center">
+<select id="clientSelect" name="client" class="form-select me-2">
+</select>
+<button type="submit" class="btn btn-primary">Load Greenhouses</button>
+</div>
+</div>
+</form>
 
-    <form id="clientSelectForm">
-        <label>Select Client:
-            <select id="clientSelect" name="client">
-                <!-- Options will be populated dynamically -->
-            </select>
-        </label>
-        <button type="submit">Load Greenhouses</button>
-    </form>
+<form id="greenhouseForm" class="mt-4" style="display:none;">
+<div id="greenhouseFields" class="mb-4"></div>
 
-    <form id="greenhouseForm" style="display:none; margin-top: 20px;">
-        <div id="greenhouseFields"></div>
+<div class="card mb-4 border-success">
+<div class="card-header bg-success text-white">
+<h3 class="mb-0">Add New Site</h3>
+</div>
+<div class="card-body">
+<div class="row g-3">
+<div class="col-md-8">
+<input type="text" id="newSiteName" placeholder="Enter new site name" class="form-control">
+</div>
+<div class="col-md-4">
+<button type="button" onclick="addNewSite()" class="btn btn-success">Add Site</button>
+</div>
+</div>
+</div>
+</div>
 
-        <div class="add-section">
-            <h3>Add New Site</h3>
-            <div class="form-group">
-                <label>Site Name:</label>
-                <input type="text" id="newSiteName" placeholder="Enter new site name">
-                <button type="button" onclick="addNewSite()">Add Site</button>
-            </div>
-        </div>
+<div class="card mb-4 border-primary">
+<div class="card-header bg-primary text-white">
+<h3 class="mb-0">Add New Greenhouse</h3>
+</div>
+<div class="card-body">
+<div class="row g-3">
+<div class="col-md-3">
+<label for="siteSelectForNew" class="form-label">Site:</label>
+<select id="siteSelectForNew" class="form-select"></select>
+</div>
+<div class="col-md-3">
+<label for="newKey" class="form-label">Key:</label>
+<input type="text" id="newKey" placeholder="Greenhouse Key" class="form-control">
+</div>
+<div class="col-md-3">
+<label for="newValue" class="form-label">Name:</label>
+<input type="text" id="newValue" placeholder="Greenhouse Name" class="form-control">
+</div>
+<div class="col-md-3 d-flex align-items-end">
+<button type="button" onclick="addNewGreenhouse()" class="btn btn-primary">Add Greenhouse</button>
+</div>
+</div>
+</div>
+</div>
 
-        <div class="add-section">
-            <h3>Add New Greenhouse</h3>
-            <div class="form-group">
-                <label>Add to Site:</label>
-                <select id="siteSelectForNew">
-                    <!-- Options will be populated dynamically -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Greenhouse Key:</label>
-                <input type="text" id="newKey" placeholder="New Greenhouse Key">
-            </div>
-            <div class="form-group">
-                <label>Greenhouse Name:</label>
-                <input type="text" id="newValue" placeholder="New Greenhouse Name">
-            </div>
-            <button type="button" onclick="addNewGreenhouse()">Add Greenhouse</button>
-        </div>
+<button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+</form>
+</div>
 
-        <button type="submit">Save Changes</button>
-    </form>
-
-    <script>
+<script>
 const clientSelect = document.getElementById('clientSelect');
 const clientSelectForm = document.getElementById('clientSelectForm');
 const greenhouseForm = document.getElementById('greenhouseForm');
 const greenhouseFields = document.getElementById('greenhouseFields');
+const siteSelectForNew = document.getElementById('siteSelectForNew');
 
 let currentClient = null;
 let greenhouseData = {};
@@ -76,115 +93,106 @@ clientSelectForm.addEventListener('submit', async (e) => {
 
 function renderFields() {
     greenhouseFields.innerHTML = '';
+    siteSelectForNew.innerHTML = '';
 
     const greenhouseArray = greenhouseData["greenhouse"];
     const siteArray = greenhouseData["site"];
 
     siteArray.forEach((siteName, index) => {
-        const siteWrapper = document.createElement('div');
-        siteWrapper.className = 'site-block';
-        siteWrapper.dataset.siteIndex = index;
+        // Populate site dropdown
+        const opt = document.createElement('option');
+        opt.value = index;
+        opt.textContent = siteName;
+        siteSelectForNew.appendChild(opt);
 
-        const siteHeader = document.createElement('div');
-        siteHeader.className = 'site-header';
+        const siteCard = document.createElement('div');
+        siteCard.className = 'card mb-3';
         
-        const siteTitle = document.createElement('h3');
+        const cardHeader = document.createElement('div');
+        cardHeader.className = 'card-header d-flex justify-content-between align-items-center';
+        
+        const siteTitle = document.createElement('div');
+        siteTitle.className = 'fw-bold';
         siteTitle.textContent = `Site: ${siteName}`;
         
-        const deleteSiteBtn = document.createElement('button');
-        deleteSiteBtn.textContent = 'Delete Site';
-        deleteSiteBtn.className = 'delete-site-btn';
-        deleteSiteBtn.type = 'button';
-        deleteSiteBtn.onclick = () => deleteSite(index);
+        const headerControls = document.createElement('div');
+        headerControls.className = 'd-flex align-items-center gap-2';
         
-        // Don't show delete button if it's the last site
-        if (siteArray.length > 1) {
-            siteHeader.appendChild(siteTitle);
-            siteHeader.appendChild(deleteSiteBtn);
-        } else {
-            siteHeader.appendChild(siteTitle);
-        }
-        
-        siteWrapper.appendChild(siteHeader);
-
         // Site name editor
-        const siteNameLabel = document.createElement('label');
-        siteNameLabel.textContent = 'Site Name: ';
         const siteNameInput = document.createElement('input');
+        siteNameInput.className = 'form-control form-control-sm';
         siteNameInput.name = `site__${index}`;
         siteNameInput.value = siteName;
         siteNameInput.placeholder = 'Site name';
+        siteNameInput.style.width = '150px';
         
-        siteWrapper.appendChild(siteNameLabel);
-        siteWrapper.appendChild(siteNameInput);
-        siteWrapper.appendChild(document.createElement('br'));
-        siteWrapper.appendChild(document.createElement('br'));
+        // Delete site button (only show if more than one site)
+        if (siteArray.length > 1) {
+            const deleteSiteBtn = document.createElement('button');
+            deleteSiteBtn.textContent = 'Delete Site';
+            deleteSiteBtn.className = 'btn btn-danger btn-sm';
+            deleteSiteBtn.type = 'button';
+            deleteSiteBtn.onclick = () => deleteSite(index);
+            headerControls.appendChild(deleteSiteBtn);
+        }
+        
+        headerControls.appendChild(siteNameInput);
+        cardHeader.appendChild(siteTitle);
+        cardHeader.appendChild(headerControls);
 
-        // Greenhouse fields for this site
+        const siteBody = document.createElement('div');
+        siteBody.className = 'card-body';
+
         const greenhouses = greenhouseArray[index] || {};
         for (const key in greenhouses) {
-            const label = document.createElement('label');
-            label.textContent = `${key}: `;
+            const row = document.createElement('div');
+            row.className = 'input-group mb-2';
+
+            const span = document.createElement('span');
+            span.className = 'input-group-text';
+            span.textContent = key;
 
             const input = document.createElement('input');
+            input.className = 'form-control';
             input.name = `${index}__${key}`;
             input.value = greenhouses[key];
-            input.placeholder = key;
 
             const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = 'Delete';
+            deleteBtn.className = 'btn btn-outline-danger btn-sm';
             deleteBtn.type = 'button';
-            deleteBtn.style.marginLeft = '10px';
-            deleteBtn.style.backgroundColor = '#ff6b6b';
-            deleteBtn.style.color = 'white';
-            deleteBtn.style.border = 'none';
-            deleteBtn.style.padding = '2px 8px';
-            deleteBtn.style.borderRadius = '3px';
-            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.textContent = 'Delete';
             deleteBtn.onclick = () => deleteGreenhouse(index, key);
 
-            siteWrapper.appendChild(label);
-            siteWrapper.appendChild(input);
-            siteWrapper.appendChild(deleteBtn);
-            siteWrapper.appendChild(document.createElement('br'));
+            row.appendChild(span);
+            row.appendChild(input);
+            row.appendChild(deleteBtn);
+            siteBody.appendChild(row);
         }
 
-        greenhouseFields.appendChild(siteWrapper);
-    });
-
-    renderSiteSelector();
-}
-
-function renderSiteSelector() {
-    const siteArray = greenhouseData["site"];
-    const siteSelect = document.getElementById('siteSelectForNew');
-    siteSelect.innerHTML = '';
-    
-    siteArray.forEach((siteName, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.textContent = siteName;
-        siteSelect.appendChild(option);
+        siteCard.appendChild(cardHeader);
+        siteCard.appendChild(siteBody);
+        greenhouseFields.appendChild(siteCard);
     });
 }
 
 function addNewSite() {
     const siteName = document.getElementById('newSiteName').value.trim();
     
-    if (siteName) {
-        // Check if site name already exists
-        if (greenhouseData.site.includes(siteName)) {
-            alert('Site name already exists!');
-            return;
-        }
-        
-        greenhouseData.site.push(siteName);
-        greenhouseData.greenhouse.push({}); // Add empty greenhouse object for new site
-        renderFields();
-        document.getElementById('newSiteName').value = '';
-    } else {
+    if (!siteName) {
         alert('Please enter a site name');
+        return;
     }
+    
+    // Check if site name already exists
+    if (greenhouseData.site.includes(siteName)) {
+        alert('Site name already exists!');
+        return;
+    }
+    
+    greenhouseData.site.push(siteName);
+    greenhouseData.greenhouse.push({}); // Add empty greenhouse object for new site
+    renderFields();
+    document.getElementById('newSiteName').value = '';
 }
 
 function deleteSite(siteIndex) {
@@ -211,47 +219,49 @@ function deleteGreenhouse(siteIndex, greenhouseKey) {
 function addNewGreenhouse() {
     const key = document.getElementById('newKey').value.trim();
     const value = document.getElementById('newValue').value.trim();
-    const siteIndex = document.getElementById('siteSelectForNew').value;
+    const siteIndex = siteSelectForNew.value;
 
-    if (key && value) {
-        // Check if greenhouse key already exists in this site
-        if (greenhouseData.greenhouse[siteIndex][key]) {
-            alert('Greenhouse key already exists in this site!');
-            return;
-        }
-        
-        greenhouseData.greenhouse[siteIndex][key] = value;
-        renderFields();
-        document.getElementById('newKey').value = '';
-        document.getElementById('newValue').value = '';
-    } else {
+    if (!key || !value) {
         alert('Please enter both greenhouse key and name');
+        return;
     }
+
+    // Check if greenhouse key already exists in this site
+    if (greenhouseData.greenhouse[siteIndex][key]) {
+        alert('Greenhouse key already exists in this site!');
+        return;
+    }
+
+    greenhouseData.greenhouse[siteIndex][key] = value;
+    renderFields();
+
+    document.getElementById('newKey').value = '';
+    document.getElementById('newValue').value = '';
 }
 
 greenhouseForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const formData = new FormData(greenhouseForm);
-    const greenhouseArray = greenhouseData.greenhouse.map(() => ({}));
-    const siteArray = [...greenhouseData.site]; // Copy current site array
+    const updatedGreenhouses = greenhouseData.greenhouse.map(() => ({}));
+    const updatedSites = [...greenhouseData.site]; // Copy current site array
 
     // Process form data
     for (const [name, value] of formData.entries()) {
         if (name.startsWith('site__')) {
             // Handle site name updates
             const siteIndex = parseInt(name.split('__')[1]);
-            siteArray[siteIndex] = value.trim();
+            updatedSites[siteIndex] = value.trim();
         } else if (name.includes('__')) {
             // Handle greenhouse updates
-            const [index, key] = name.split('__');
-            greenhouseArray[+index][key] = value;
+            const [siteIndex, ghKey] = name.split('__');
+            updatedGreenhouses[siteIndex][ghKey] = value;
         }
     }
 
     // Validate that all site names are unique and non-empty
     const uniqueSiteNames = new Set();
-    for (const siteName of siteArray) {
+    for (const siteName of updatedSites) {
         if (!siteName.trim()) {
             alert('All sites must have a name');
             return;
@@ -265,11 +275,9 @@ greenhouseForm.addEventListener('submit', async (e) => {
 
     const payload = {
         client_name: currentClient,
-        sites: siteArray,
-        greenhouses: greenhouseArray
+        sites: updatedSites,
+        greenhouses: updatedGreenhouses
     };
-
-    console.log('Sending payload:', payload);
 
     try {
         const res = await fetch('/update-greenhouses', {
@@ -282,8 +290,8 @@ greenhouseForm.addEventListener('submit', async (e) => {
         alert(result.message);
         
         // Update local data to reflect saved changes
-        greenhouseData.site = siteArray;
-        greenhouseData.greenhouse = greenhouseArray;
+        greenhouseData.site = updatedSites;
+        greenhouseData.greenhouse = updatedGreenhouses;
         
     } catch (error) {
         alert('Error saving changes: ' + error.message);
@@ -292,7 +300,6 @@ greenhouseForm.addEventListener('submit', async (e) => {
 
 fetchClients();
 </script>
-
 {% endblock %}
 {% block content %}
 {% endblock %}
