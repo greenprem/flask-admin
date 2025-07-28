@@ -258,7 +258,7 @@ class EnvDataView(ModelView):
 class MiscView(ModelView):
     page_size = 10
     fields = [
-        "id", "client", "site", "parameter", "greenhouse","json"
+        "id", "client", "crop" "site", "parameter", "greenhouse","json"
     ]
 # class FeedbackView(ModelView):
 #     page_size = 10
