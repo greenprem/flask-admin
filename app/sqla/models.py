@@ -83,6 +83,7 @@ class Misc(Base):
     site = Column(String, nullable=False)
     greenhouse = Column(String, nullable=False)
     crop = Column(String, nullable=False)
+    parameter = Column(String, nullable=False)
     json = Column(MutableDict.as_mutable(PostgresJSON), nullable=False)
 
 '''
