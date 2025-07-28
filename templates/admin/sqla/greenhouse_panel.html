@@ -2,6 +2,50 @@
 <html>
 <head>
     <title>Edit Greenhouses</title>
+    <style>
+        .site-block {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delete-site-btn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .delete-site-btn:hover {
+            background-color: #ff5252;
+        }
+        .add-section {
+            background-color: #e8f5e8;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #c8e6c9;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        .form-group label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            padding: 5px;
+            margin: 5px;
+        }
+    </style>
 </head>
 <body>
     <h1>Greenhouse Manager</h1>
@@ -18,10 +62,33 @@
     <form id="greenhouseForm" style="display:none; margin-top: 20px;">
         <div id="greenhouseFields"></div>
 
-        <h3>Add New Greenhouse</h3>
-        <input type="text" id="newKey" placeholder="New Greenhouse Key">
-        <input type="text" id="newValue" placeholder="New Greenhouse Name">
-        <button type="button" onclick="addNewGreenhouse()">Add</button><br><br>
+        <div class="add-section">
+            <h3>Add New Site</h3>
+            <div class="form-group">
+                <label>Site Name:</label>
+                <input type="text" id="newSiteName" placeholder="Enter new site name">
+                <button type="button" onclick="addNewSite()">Add Site</button>
+            </div>
+        </div>
+
+        <div class="add-section">
+            <h3>Add New Greenhouse</h3>
+            <div class="form-group">
+                <label>Add to Site:</label>
+                <select id="siteSelectForNew">
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Greenhouse Key:</label>
+                <input type="text" id="newKey" placeholder="New Greenhouse Key">
+            </div>
+            <div class="form-group">
+                <label>Greenhouse Name:</label>
+                <input type="text" id="newValue" placeholder="New Greenhouse Name">
+            </div>
+            <button type="button" onclick="addNewGreenhouse()">Add Greenhouse</button>
+        </div>
 
         <button type="submit">Save Changes</button>
     </form>
@@ -66,27 +133,71 @@ function renderFields() {
         siteWrapper.className = 'site-block';
         siteWrapper.dataset.siteIndex = index;
 
-        const siteHeader = document.createElement('h3');
-        siteHeader.textContent = `Site: ${siteName}`;
+        const siteHeader = document.createElement('div');
+        siteHeader.className = 'site-header';
+        
+        const siteTitle = document.createElement('h3');
+        siteTitle.textContent = `Site: ${siteName}`;
+        
+        const deleteSiteBtn = document.createElement('button');
+        deleteSiteBtn.textContent = 'Delete Site';
+        deleteSiteBtn.className = 'delete-site-btn';
+        deleteSiteBtn.type = 'button';
+        deleteSiteBtn.onclick = () => deleteSite(index);
+        
+        // Don't show delete button if it's the last site
+        if (siteArray.length > 1) {
+            siteHeader.appendChild(siteTitle);
+            siteHeader.appendChild(deleteSiteBtn);
+        } else {
+            siteHeader.appendChild(siteTitle);
+        }
+        
         siteWrapper.appendChild(siteHeader);
 
-        const greenhouses = greenhouseArray[index];
+        // Site name editor
+        const siteNameLabel = document.createElement('label');
+        siteNameLabel.textContent = 'Site Name: ';
+        const siteNameInput = document.createElement('input');
+        siteNameInput.name = `site__${index}`;
+        siteNameInput.value = siteName;
+        siteNameInput.placeholder = 'Site name';
+        
+        siteWrapper.appendChild(siteNameLabel);
+        siteWrapper.appendChild(siteNameInput);
+        siteWrapper.appendChild(document.createElement('br'));
+        siteWrapper.appendChild(document.createElement('br'));
+
+        // Greenhouse fields for this site
+        const greenhouses = greenhouseArray[index] || {};
         for (const key in greenhouses) {
             const label = document.createElement('label');
             label.textContent = `${key}: `;
 
             const input = document.createElement('input');
-            input.name = `${index}__${key}`; // include index in name
+            input.name = `${index}__${key}`;
             input.value = greenhouses[key];
             input.placeholder = key;
 
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.type = 'button';
+            deleteBtn.style.marginLeft = '10px';
+            deleteBtn.style.backgroundColor = '#ff6b6b';
+            deleteBtn.style.color = 'white';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.padding = '2px 8px';
+            deleteBtn.style.borderRadius = '3px';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.onclick = () => deleteGreenhouse(index, key);
+
             siteWrapper.appendChild(label);
             siteWrapper.appendChild(input);
+            siteWrapper.appendChild(deleteBtn);
             siteWrapper.appendChild(document.createElement('br'));
         }
 
         greenhouseFields.appendChild(siteWrapper);
-        greenhouseFields.appendChild(document.createElement('hr'));
     });
 
     renderSiteSelector();
@@ -94,15 +205,55 @@ function renderFields() {
 
 function renderSiteSelector() {
     const siteArray = greenhouseData["site"];
-    const container = document.createElement('div');
-    container.innerHTML = `
-        <label>Add to Site:
-            <select id="siteSelectForNew">
-                ${siteArray.map((s, i) => `<option value="${i}">${s}</option>`).join('')}
-            </select>
-        </label>
-    `;
-    greenhouseFields.appendChild(container);
+    const siteSelect = document.getElementById('siteSelectForNew');
+    siteSelect.innerHTML = '';
+    
+    siteArray.forEach((siteName, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = siteName;
+        siteSelect.appendChild(option);
+    });
+}
+
+function addNewSite() {
+    const siteName = document.getElementById('newSiteName').value.trim();
+    
+    if (siteName) {
+        // Check if site name already exists
+        if (greenhouseData.site.includes(siteName)) {
+            alert('Site name already exists!');
+            return;
+        }
+        
+        greenhouseData.site.push(siteName);
+        greenhouseData.greenhouse.push({}); // Add empty greenhouse object for new site
+        renderFields();
+        document.getElementById('newSiteName').value = '';
+    } else {
+        alert('Please enter a site name');
+    }
+}
+
+function deleteSite(siteIndex) {
+    if (greenhouseData.site.length <= 1) {
+        alert('Cannot delete the last site!');
+        return;
+    }
+    
+    const siteName = greenhouseData.site[siteIndex];
+    if (confirm(`Are you sure you want to delete site "${siteName}" and all its greenhouses?`)) {
+        greenhouseData.site.splice(siteIndex, 1);
+        greenhouseData.greenhouse.splice(siteIndex, 1);
+        renderFields();
+    }
+}
+
+function deleteGreenhouse(siteIndex, greenhouseKey) {
+    if (confirm(`Are you sure you want to delete greenhouse "${greenhouseKey}"?`)) {
+        delete greenhouseData.greenhouse[siteIndex][greenhouseKey];
+        renderFields();
+    }
 }
 
 function addNewGreenhouse() {
@@ -111,10 +262,18 @@ function addNewGreenhouse() {
     const siteIndex = document.getElementById('siteSelectForNew').value;
 
     if (key && value) {
+        // Check if greenhouse key already exists in this site
+        if (greenhouseData.greenhouse[siteIndex][key]) {
+            alert('Greenhouse key already exists in this site!');
+            return;
+        }
+        
         greenhouseData.greenhouse[siteIndex][key] = value;
-        renderFields(); // re-render to reflect
+        renderFields();
         document.getElementById('newKey').value = '';
         document.getElementById('newValue').value = '';
+    } else {
+        alert('Please enter both greenhouse key and name');
     }
 }
 
@@ -123,25 +282,60 @@ greenhouseForm.addEventListener('submit', async (e) => {
 
     const formData = new FormData(greenhouseForm);
     const greenhouseArray = greenhouseData.greenhouse.map(() => ({}));
+    const siteArray = [...greenhouseData.site]; // Copy current site array
 
-    // Rebuild greenhouseArray with updated values
+    // Process form data
     for (const [name, value] of formData.entries()) {
-        const [index, key] = name.split('__');
-        greenhouseArray[+index][key] = value;
+        if (name.startsWith('site__')) {
+            // Handle site name updates
+            const siteIndex = parseInt(name.split('__')[1]);
+            siteArray[siteIndex] = value.trim();
+        } else if (name.includes('__')) {
+            // Handle greenhouse updates
+            const [index, key] = name.split('__');
+            greenhouseArray[+index][key] = value;
+        }
     }
 
-    const res = await fetch('/update-greenhouses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            client_name: currentClient,
-            sites: greenhouseData.site,
-            greenhouses: greenhouseArray
-        })
-    });
+    // Validate that all site names are unique and non-empty
+    const uniqueSiteNames = new Set();
+    for (const siteName of siteArray) {
+        if (!siteName.trim()) {
+            alert('All sites must have a name');
+            return;
+        }
+        if (uniqueSiteNames.has(siteName.trim())) {
+            alert(`Duplicate site name found: "${siteName}"`);
+            return;
+        }
+        uniqueSiteNames.add(siteName.trim());
+    }
 
-    const result = await res.json();
-    alert(result.message);
+    const payload = {
+        client_name: currentClient,
+        sites: siteArray,
+        greenhouses: greenhouseArray
+    };
+
+    console.log('Sending payload:', payload);
+
+    try {
+        const res = await fetch('/update-greenhouses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+        alert(result.message);
+        
+        // Update local data to reflect saved changes
+        greenhouseData.site = siteArray;
+        greenhouseData.greenhouse = greenhouseArray;
+        
+    } catch (error) {
+        alert('Error saving changes: ' + error.message);
+    }
 });
 
 fetchClients();
