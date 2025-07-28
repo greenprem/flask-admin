@@ -75,6 +75,16 @@ class EnvData(Base):
     time = Column(Time, nullable=False)
     json_data = Column(MutableDict.as_mutable(PostgresJSON), nullable=False)
 
+class Misc(Base):
+    __tablename__ = 'misc'
+
+    id = Column(Integer, primary_key=True)
+    client = Column(String, nullable=False)
+    site = Column(String, nullable=False)
+    greenhouse = Column(String, nullable=False)
+    crop = Column(String, nullable=False)
+    json = Column(MutableDict.as_mutable(PostgresJSON), nullable=False)
+
 '''
 class Feedback(Base):
     __tablename__ = 'feedback'

@@ -23,7 +23,6 @@ from typing import Any
 
 # from app.sqla.models import Client, SymptomThreshold, CycleInfo, Greenhouse, EnvData, Feedback, SensorRange, DiseaseData, BucketValues, PlantWeek, Observation, Grid, GridAnalysis, FeedBackGridImages, Weeks
 
-from app.sqla.models import Client
 
 class ClientView(ModelView):
     row_actions = ["view", "edit", "make_published", "delete"]
@@ -254,6 +253,13 @@ class EnvDataView(ModelView):
         "date", "time", "json_data"
     ]
     exclude_fields_from_edit = ["client_name", "site", "greenhouse_id","item_id"]
+
+
+class MiscView(ModelView):
+    page_size = 10
+    fields = [
+        "id", "client", "site", "greenhouse","json"
+    ]
 # class FeedbackView(ModelView):
 #     page_size = 10
 #     fields = [
